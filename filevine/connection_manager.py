@@ -60,13 +60,11 @@ class ConnectionManager:
         self.__token_manager = await TokenManager.create(credentials, base_url)
         if self.connector:
             self.__session = aiohttp.ClientSession(
-                headers={"Authorization": "Bearer " + self.__token_manager.access_token},
                 timeout=aiohttp.ClientTimeout(total=90),
                 connector=self.connector
             )
         else:
             self.__session = aiohttp.ClientSession(
-                headers={"Authorization": "Bearer " + self.__token_manager.access_token},
                 timeout=aiohttp.ClientTimeout(total=90)
             )
         return self
@@ -95,6 +93,7 @@ class ConnectionManager:
         if not headers:
             headers = dict()
         headers["x-fv-sessionid"] = self.token_manager.refresh_token
+        headers["Authorization"] = f"Bearer {self.__token_manager.access_token}"
         async with self.__session.get(url, params=params, headers=headers) as response:
             if response.status == 200:
                 return await response.json()
@@ -107,6 +106,7 @@ class ConnectionManager:
     async def patch(self, endpoint: str, json: dict, headers: dict = None):
         url = self.__base_url + endpoint
         headers["x-fv-sessionid"] = self.token_manager.refresh_token
+        headers["Authorization"] = f"Bearer {self.__token_manager.access_token}"
         async with self.__session.patch(url, json=json, headers=headers) as response:
             if response.status == 200:
                 return await response.json()
@@ -119,6 +119,7 @@ class ConnectionManager:
     async def post(self, endpoint: str, json: dict, headers: dict = None):
         url = self.__base_url + endpoint
         headers["x-fv-sessionid"] = self.token_manager.refresh_token
+        headers["Authorization"] = f"Bearer {self.__token_manager.access_token}"
         async with self.__session.post(url, json=json, headers=headers) as response:
             if response.status == 200:
                 return await response.json()

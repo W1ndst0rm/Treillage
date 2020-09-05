@@ -1,5 +1,5 @@
 title = 'Filevine API Tools'
-__version__ = '0.1.2'
+__version__ = '0.1.3'
 
 from .filevine import Filevine
 from .filevine import BaseURL

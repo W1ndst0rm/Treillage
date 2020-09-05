@@ -24,7 +24,7 @@ setup(
         "Development Status :: 3 - Alpha",
         "Framework :: AsyncIO",
         "Intended Audience :: Developers",
-        "Intended Audience :: Information Technology"
+        "Intended Audience :: Information Technology",
         "Intended Audience :: Legal Industry",
         "Topic :: Software Development :: Libraries :: Python Modules",
         "Topic :: Internet"

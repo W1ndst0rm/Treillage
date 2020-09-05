@@ -153,3 +153,4 @@ fabric.properties
 # Project specific
 credentials/
 main.py
+/.pypirc

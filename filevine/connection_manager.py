@@ -86,43 +86,43 @@ class ConnectionManager:
     def connector(self) -> aiohttp.TCPConnector:
         return self.__connector
 
+    async def __handle_response(self, response, http_success_code: int = 200):
+        if response.status == http_success_code:
+            self.__rate_limiter.last_try_success(True)
+            return await response.json()
+        else:
+            if response.status == 429:
+                self.__rate_limiter.last_try_success(False)
+            msg = await response.text()
+            raise FilevineHTTPException(code=response.status, url=response.url, msg=msg)
+
+    def __setup_headers(self, headers: dict = None) -> dict:
+        if not headers:
+            headers = dict()
+        headers["x-fv-sessionid"] = self.__token_manager.refresh_token
+        headers["Authorization"] = f"Bearer {self.__token_manager.access_token}"
+        return headers
+
     @renew_access_token
     @rate_limit
     async def get(self, endpoint: str, params: dict = None, headers: dict = None):
-        url = self.__base_url + endpoint
-        if not headers:
-            headers = dict()
-        headers["x-fv-sessionid"] = self.token_manager.refresh_token
-        headers["Authorization"] = f"Bearer {self.__token_manager.access_token}"
-        async with self.__session.get(url, params=params, headers=headers) as response:
-            if response.status == 200:
-                return await response.json()
-            else:
-                msg = await response.text()
-                raise FilevineHTTPException(code=response.status, url=url, msg=msg)
+        async with self.__session.get(url=self.__base_url + endpoint,
+                                      params=params,
+                                      headers=self.__setup_headers(headers)) as response:
+            return await self.__handle_response(response, 200)
 
     @renew_access_token
     @rate_limit
     async def patch(self, endpoint: str, json: dict, headers: dict = None):
-        url = self.__base_url + endpoint
-        headers["x-fv-sessionid"] = self.token_manager.refresh_token
-        headers["Authorization"] = f"Bearer {self.__token_manager.access_token}"
-        async with self.__session.patch(url, json=json, headers=headers) as response:
-            if response.status == 200:
-                return await response.json()
-            else:
-                msg = await response.text()
-                raise FilevineHTTPException(code=response.status, url=url, msg=msg)
+        async with self.__session.patch(url=self.__base_url + endpoint,
+                                        json=json,
+                                        headers=self.__setup_headers(headers)) as response:
+            return await self.__handle_response(response, 200)
 
     @renew_access_token
     @rate_limit
     async def post(self, endpoint: str, json: dict, headers: dict = None):
-        url = self.__base_url + endpoint
-        headers["x-fv-sessionid"] = self.token_manager.refresh_token
-        headers["Authorization"] = f"Bearer {self.__token_manager.access_token}"
-        async with self.__session.post(url, json=json, headers=headers) as response:
-            if response.status == 200:
-                return await response.json()
-            else:
-                msg = await response.text()
-                raise FilevineHTTPException(code=response.status, url=url, msg=msg)
+        async with self.__session.post(url=self.__base_url + endpoint,
+                                       json=json,
+                                       headers=self.__setup_headers(headers)) as response:
+            return await self.__handle_response(response, 200)

@@ -10,13 +10,17 @@ class RateLimiter:
         self.__token_rate = token_rate
         self.__last_update = time.monotonic()
         self.__last_try_success = True
+        self.__waited_after_failure = False
         self.__backoff_time = 0
         self.__failed_attempts = 0
 
     async def wait_for_token(self):
         while self.__tokens <= 1:
             self.__add_new_token()
-            await asyncio.sleep(1 + self.__backoff_time)
+            await asyncio.sleep(1)
+            if not self.__last_try_success:
+                await asyncio.sleep(self.__backoff_time)
+                self.__waited_after_failure = True
         self.__tokens -= 1
 
     @property
@@ -36,7 +40,7 @@ class RateLimiter:
             self.__failed_attempts = 0
 
     def __add_new_token(self):
-        if not self.__last_try_success:
+        if self.__last_try_success or self.__waited_after_failure:
             now = time.monotonic()
             time_since_update = now - self.__last_update
             new_tokens = time_since_update * self.__token_rate

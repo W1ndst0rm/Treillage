@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setup(
     name='filevine',
-    version='0.2.1',
+    version='0.2.2',
     description='Wrapper library for the Filevine API',
     long_description=long_description,
     long_description_content_type="text/markdown",

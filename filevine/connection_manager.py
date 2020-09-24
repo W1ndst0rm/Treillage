@@ -52,11 +52,13 @@ class ConnectionManager:
     async def create(cls,
                      base_url: str,
                      credentials: dict,
+                     max_connections: int = None,
                      rate_limit_max_tokens: int = None,
                      rate_limit_token_regen_rate: int = None
                      ):
 
-        self = ConnectionManager(base_url, credentials, rate_limit_max_tokens, rate_limit_token_regen_rate)
+        self = ConnectionManager(base_url, credentials, max_connections, rate_limit_max_tokens,
+                                 rate_limit_token_regen_rate)
         self.__token_manager = await TokenManager.create(credentials, base_url)
         if self.connector:
             self.__session = aiohttp.ClientSession(
@@ -88,10 +90,11 @@ class ConnectionManager:
 
     async def __handle_response(self, response, http_success_code: int = 200):
         if response.status == http_success_code:
-            self.__rate_limiter.last_try_success(True)
+            if self.__rate_limiter is not None:
+                self.__rate_limiter.last_try_success(True)
             return await response.json()
         else:
-            if response.status == 429:
+            if response.status == 429 and self.__rate_limiter is not None:
                 self.__rate_limiter.last_try_success(False)
             msg = await response.text()
             raise FilevineHTTPException(code=response.status, url=response.url, msg=msg)

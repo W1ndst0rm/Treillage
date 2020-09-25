@@ -29,6 +29,7 @@ class Filevine:
     async def __async_init(self):
         self.__conn = await ConnectionManager.create(self.__base_url,
                                                      self.__credentials,
+                                                     self.__max_connections,
                                                      self.__rate_limit_max_tokens,
                                                      self.__rate_limit_token_regen_rate)
 

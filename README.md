@@ -57,7 +57,7 @@ async with Filevine(credentials_file="creds.yml") as fv:
     async for contact in get_contact_list(fv.conn, fields=['fullName', 'personId'], first_name='James'):
         print(contact['fullName'])
 ```
-This will request the personId and fullName fields for all contacts with the first name of 'James'.
+This will request the `personId` and `fullName` fields for all contacts with the first name of 'James'.
 
 Using raw HTTP methods
 ----------------------
@@ -72,7 +72,7 @@ async with Filevine(credentials_file="creds.yml") as fv:
     for contact in contacts:
         print(contact['fullName'])
 ```
-This will request the personId and fullName fields for the first 50 contacts with the first name of 'James'.
+This will request the `personId` and `fullName` fields for the first 50 contacts with the first name of 'James'.
 
 POST and DELETE work similarly
 ```python

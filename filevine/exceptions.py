@@ -17,6 +17,14 @@ class FilevineHTTPException(FilevineException):
         super(FilevineHTTPException, self).__init__(msg=msg, url=url,)
 
 
+class FilevineRateLimitException(FilevineHTTPException):
+    def __init__(self, url=None, msg=None):
+        self.code = 429
+        if not msg:
+            msg = "Server Rate Limit Exceeded"
+        super(FilevineRateLimitException, self).__init__(self.code, url, msg)
+
+
 class FilevineTypeError(FilevineException, TypeError):
     def __init__(self, expected_type, received_type):
         msg = f"Type {expected_type} required in API definition, but received {received_type}"

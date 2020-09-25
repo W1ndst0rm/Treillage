@@ -48,8 +48,8 @@ The full name of every contact is then printed to the console.
 
 Using raw HTTP methods
 ----------------------
-If there isn't an function written for the built-in endpoint you need, you can still use the rate limiting
-and credential rotator features
+If there isn't a function written for the built-in endpoint you need, you can still use the rate limiting
+and credential rotation features
 ```python
 from filevine import Filevine
 

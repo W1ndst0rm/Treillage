@@ -1,5 +1,7 @@
 Wrapper library for the Filevine API
 ====================================
+[![PyPI version](https://badge.fury.io/py/filevine.svg)](https://pypi.org/project/filevine)
+
 [API Documentation](https://developer.filevine.io/v2/overview)
 
 Key Features
@@ -17,21 +19,33 @@ Table of contents
 * [Getting Started](#getting-started)
     * [Using built-in endpoints](#using-built-in-endpoints)
     * [Using raw HTTP methods](#using-raw-http-methods)
+    * [Base URL](#base-url)
 * [Rate Limiting and Connection Management](#Rate-Limiting-and-Connection-Management)
 * [Exceptions](#exceptions)
     * [FilevineHTTPException](#FilevineHTTPException)
     * [FilevineRateLimitException](#FilevineRateLimitException)
     * [FilevineTypeError](#FilevineTypeError)
     * [FilevineValueError](#FilevineValueError)
+* [Examples](#examples)
 <!--te-->
 ## Library Installation
-```
+```shell script
 pip install filevine
 ```
 
 Getting Started
 =================
-The only required parameter is a path to the yaml credentials file from the [developer portal](https://portal.filevine.io/)
+The only required parameter is a path to a yaml credentials file with the following keys: `key`, `secret`, `queueid`.
+It should look like this:
+```yaml
+key: "fvpk_************************"
+secret: "fvsk_***********************************"
+queueid: "***********"
+``` 
+These values are obtained from the [developer portal](https://portal.filevine.io/).
+The filevine module uses these credentials to obtain the accessToken and refreshToken for the authorization header.
+These tokens are refreshed as needed throughout script execution. 
+
  
 Using built-in endpoints
 ------------------------
@@ -43,8 +57,7 @@ async with Filevine(credentials_file="creds.yml") as fv:
     async for contact in get_contact_list(fv.conn, fields=['fullName', 'personId'], first_name='James'):
         print(contact['fullName'])
 ```
-This will request the personId and fullName fields for all contacts with the first_name 'James'.
-The full name of every contact is then printed to the console.
+This will request the personId and fullName fields for all contacts with the first name of 'James'.
 
 Using raw HTTP methods
 ----------------------
@@ -59,7 +72,7 @@ async with Filevine(credentials_file="creds.yml") as fv:
     for contact in contacts:
         print(contact['fullName'])
 ```
-This will request the personId and fullName fields for the first 50 contacts with the firstName of 'James'.
+This will request the personId and fullName fields for the first 50 contacts with the first name of 'James'.
 
 POST and DELETE work similarly
 ```python
@@ -79,6 +92,20 @@ async with Filevine(credentials_file="creds.yml") as fv:
     await fv.conn.delete(endpoint='/core/documents/1234')
 ```
 
+Base URL
+--------
+The base url for the server defaults to United States server at https://api.filevine.io.
+To access the Canada specific server pass in the base_url parameter
+```python
+from filevine import Filevine, BaseURL
+
+# Use the built-in Enum
+async with Filevine(credentials_file="creds.yml", base_url=BaseURL.CANADA) as fv:
+
+# Pass in a string
+async with Filevine(credentials_file="creds.yml", base_url='https://api.filevine.ca') as fv:
+```
+
 Rate Limiting and Connection Management
 ======================================= 
 The built-in rate limiter uses a token bucket technique. Each  web request consumes a token,
@@ -88,6 +115,8 @@ from exceeding the rate-limit.
 To use the built-in rate limiter, two parameters must be passed to the filevine object:
 * `rate_limit_max_tokens` sets the capacity of the token bucket
 * `rate_limit_token_regen_rate` sets how many tokens are regenerated per second.
+
+If either one of the parameters is not set, no rate-limiting will occur.
 ```python
 async with Filevine(credentials_file="creds.yml", rate_limit_max_tokens=10, rate_limit_token_regen_rate=10) as fv:
     fv.do_something()
@@ -96,7 +125,7 @@ Additionally, the rate limiter will use an exponential backoff algorithm to
 temporarily slow down requests when the server returns a HTTP 429 error (Rate Limit Exceeded). 
 
 Alternatively the total number of simultaneous connections to the server can limited by passing
-the `max_connections` parameter or the default value of `100` will be used.
+the `max_connections` parameter. If `max_connections` is not set, the default value of `100` will be used.
 
 Exceptions
 ==========
@@ -136,4 +165,7 @@ For example, a contact's personTypes must be in the list `['Adjuster', 'Attorney
 'Defendant', 'Plaintiff', 'Expert', 'Firm', 'Insurance Company', 'Involved Party', 'Judge', 'Medical Provider']`
 * Parameters:
     * msg
-
+    
+Examples
+========
+The [examples](examples/README.md) folder contains complete non-trivial examples of this module in use.

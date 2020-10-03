@@ -1,6 +1,7 @@
 from typing import List
-from .connection_manager import ConnectionManager
-from .exceptions import *
+from .. import ConnectionManager
+from .. import FilevineTypeError, FilevineValueError
+from .list_paginator import list_paginator
 
 
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -48,16 +49,8 @@ async def get_contact_list(connection: ConnectionManager,
     if email:
         params['email'] = email
 
-    has_more = True
-    params['offset'] = 0
-    params['limit'] = 50
-
-    while has_more:
-        resp = await connection.get(endpoint, params)
-        has_more = resp['hasMore']
-        params['offset'] += params['limit']
-        for contact in resp['items']:
-            yield contact
+    async for contact in list_paginator(connection, endpoint, params):
+        yield contact
 
 
 async def create_contact():

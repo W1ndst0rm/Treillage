@@ -1,8 +1,10 @@
 import aiohttp
-from datetime import datetime, timedelta
+import asyncio
+from datetime import datetime
 from enum import Enum
-from .exceptions import FilevineException
+from .exceptions import FilevineHTTPException, FilevineException
 import hashlib
+import jwt
 
 
 class TokenRequestType(Enum):
@@ -74,20 +76,20 @@ class TokenManager:
                 'sessionId': self.__refresh_token
             }
         else:
-            raise FilevineException(msg="Invalid Request Type")
-
-        async with aiohttp.ClientSession() as session:
-            async with session.post(self.__auth_url, json=request_body) as resp:
-                if resp.status == 200:
-                    tokens = await resp.json()
-                    tokens['accessTokenExpiry'] = (datetime.now() + timedelta(minutes=10)).timestamp()
-                    return tokens
-                else:
-                    raise FilevineException(msg='Failed to get API tokens', url=self.__auth_url)
+            raise FilevineException(msg="Invalid Token Request Type")
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.post(self.__auth_url, json=request_body) as resp:
+                    if resp.status == 200:
+                        return await resp.json()
+                    else:
+                        raise FilevineHTTPException(resp.status, msg='Failed to get API tokens', url=self.__auth_url)
+        finally:
+            await asyncio.sleep(0.250)
 
     def __set_tokens(self, tokens: dict):
         self.__access_token = tokens["accessToken"]
-        self.__access_token_expiry = tokens["accessTokenExpiry"]
+        self.__access_token_expiry = jwt.decode(tokens['accessToken'], verify=False)['exp']
         self.__refresh_token = tokens["refreshToken"]
         self.__refresh_token_expiry = tokens["refreshTokenExpiry"]
         self.__refresh_token_ttl = tokens["refreshTokenTtl"]
@@ -96,6 +98,7 @@ class TokenManager:
 
     async def __aenter__(self):
         self.__set_tokens(await self.__request_tokens(TokenRequestType.KEY))
+        return self
 
     async def __aexit__(self, exception_type, exception_value, traceback):
         pass

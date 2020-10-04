@@ -10,7 +10,7 @@ from .exceptions import FilevineHTTPException
 def renew_access_token(func):
     @functools.wraps(func)
     async def wrapped(self, *args, **kwargs):
-        if time.time() > self.token_manager.access_token_expiry:
+        if time.time() > self.token_manager.access_token_expiry - 90:  # Refresh the token 90 seconds before it expires
             await self.token_manager.refresh_access_token()
         return await func(self, *args, **kwargs)
 

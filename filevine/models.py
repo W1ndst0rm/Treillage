@@ -15,7 +15,7 @@ class ProjectListFactory(ModelFactory):
 
     def meta_data(self):
         meta_data_dict = {}
-        for k,v in self.__dict__.items():
+        for k, v in self.__dict__.items():
             meta_data_dict[k] = v
         if meta_data_dict["items"]:
             del meta_data_dict["items"]

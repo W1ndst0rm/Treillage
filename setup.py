@@ -1,11 +1,14 @@
 from setuptools import setup, find_packages
 
+import versioneer
+
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setup(
     name='filevine',
-    version='0.3.0',
+    version=versioneer.get_version(),
+    cmdclass=versioneer.get_cmdclass(),
     description='Wrapper library for the Filevine API',
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -15,7 +18,8 @@ setup(
     install_requires=[
         'aiohttp',
         'pandas',
-        'PyYAML'
+        'PyYAML',
+        'PyJWT'
     ],
     classifiers=[
         "Programming Language :: Python :: 3.8",

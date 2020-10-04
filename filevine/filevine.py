@@ -1,6 +1,7 @@
 from .config import get_credentials
 from .connection_manager import ConnectionManager
 from enum import Enum
+from typing import Union
 
 
 class BaseURL(Enum):
@@ -11,12 +12,15 @@ class BaseURL(Enum):
 class Filevine:
     def __init__(self,
                  credentials_file: str,
-                 base_url: BaseURL = BaseURL.UNITED_STATES,
+                 base_url: Union[str, BaseURL] = BaseURL.UNITED_STATES.value,
                  max_connections: int = None,  # Number of parallel connections to each host:port endpoint
                  rate_limit_token_regen_rate: int = None,  # Number of tokens added per second to the rate limit pool
                  rate_limit_max_tokens: int = None):  # Max number of tokens in the rate limit pool
         self.__credentials = get_credentials(credentials_file)
-        self.__base_url = base_url.value
+        if isinstance(base_url, BaseURL):
+            self.__base_url = base_url.value
+        elif isinstance(base_url, str):
+            self.__base_url = base_url
         self.__max_connections = max_connections
         self.__rate_limit_token_regen_rate = rate_limit_token_regen_rate
         self.__rate_limit_max_tokens = rate_limit_max_tokens

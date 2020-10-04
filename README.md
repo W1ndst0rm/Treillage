@@ -1,6 +1,7 @@
 Wrapper library for the Filevine API
 ====================================
 [![PyPI version](https://badge.fury.io/py/filevine.svg)](https://pypi.org/project/filevine)
+[![Maintainability](https://api.codeclimate.com/v1/badges/bf254c3b8df16d56357b/maintainability)](https://codeclimate.com/github/W1ndst0rm/Filevine/maintainability)
 
 [API Documentation](https://developer.filevine.io/v2/overview)
 

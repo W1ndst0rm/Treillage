@@ -18,7 +18,8 @@ setup(
     install_requires=[
         'aiohttp',
         'pandas',
-        'PyYAML'
+        'PyYAML',
+        'PyJWT'
     ],
     classifiers=[
         "Programming Language :: Python :: 3.8",

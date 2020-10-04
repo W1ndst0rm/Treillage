@@ -37,7 +37,7 @@ class TokenManager:
         return self.__access_token
 
     @property
-    def access_token_expiry(self) -> str:
+    def access_token_expiry(self) -> int:
         return self.__access_token_expiry
 
     @property

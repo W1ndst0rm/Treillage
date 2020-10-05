@@ -2,7 +2,7 @@ import aiohttp
 import asyncio
 from datetime import datetime
 from enum import Enum
-from .exceptions import FilevineHTTPException, FilevineException
+from .exceptions import TreillageHTTPException, TreillageException
 import hashlib
 import jwt
 
@@ -37,7 +37,7 @@ class TokenManager:
         return self.__access_token
 
     @property
-    def access_token_expiry(self) -> str:
+    def access_token_expiry(self) -> int:
         return self.__access_token_expiry
 
     @property
@@ -76,14 +76,14 @@ class TokenManager:
                 'sessionId': self.__refresh_token
             }
         else:
-            raise FilevineException(msg="Invalid Token Request Type")
+            raise TreillageException(msg="Invalid Token Request Type")
         try:
             async with aiohttp.ClientSession() as session:
                 async with session.post(self.__auth_url, json=request_body) as resp:
                     if resp.status == 200:
                         return await resp.json()
                     else:
-                        raise FilevineHTTPException(resp.status, msg='Failed to get API tokens', url=self.__auth_url)
+                        raise TreillageHTTPException(resp.status, msg='Failed to get API tokens', url=self.__auth_url)
         finally:
             await asyncio.sleep(0.250)
 

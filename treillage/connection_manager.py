@@ -4,7 +4,7 @@ import functools
 import time
 from .token_manager import TokenManager
 from .ratelimiter import RateLimiter
-from .exceptions import FilevineHTTPException
+from .exceptions import TreillageHTTPException, TreillageRateLimitException
 
 
 def renew_access_token(func):
@@ -21,7 +21,7 @@ def rate_limit(func):
     @functools.wraps(func)
     async def wrapped(self, *args, **kwargs):
         if self.rate_limiter:
-            await self.rate_limiter.wait_for_token()
+            await self.rate_limiter.get_token()
         return await func(self, *args, **kwargs)
 
     return wrapped
@@ -30,7 +30,7 @@ def rate_limit(func):
 class ConnectionManager:
     def __init__(self,
                  base_url: str,
-                 credentials: dict,
+                 credentials,
                  max_connections: int = None,
                  rate_limit_max_tokens: int = None,
                  rate_limit_token_regen_rate: int = None
@@ -51,7 +51,7 @@ class ConnectionManager:
     @classmethod
     async def create(cls,
                      base_url: str,
-                     credentials: dict,
+                     credentials,
                      max_connections: int = None,
                      rate_limit_max_tokens: int = None,
                      rate_limit_token_regen_rate: int = None
@@ -94,10 +94,13 @@ class ConnectionManager:
                 self.__rate_limiter.last_try_success(True)
             return await response.json()
         else:
-            if response.status == 429 and self.__rate_limiter is not None:
-                self.__rate_limiter.last_try_success(False)
             msg = await response.text()
-            raise FilevineHTTPException(code=response.status, url=response.url, msg=msg)
+            if response.status == 429:
+                if self.__rate_limiter is not None:
+                    self.__rate_limiter.last_try_success(False)
+                raise TreillageRateLimitException(url=response.url, msg=msg)
+            else:
+                raise TreillageHTTPException(code=response.status, url=response.url, msg=msg)
 
     def __setup_headers(self, headers: dict = None) -> dict:
         if not headers:
@@ -129,3 +132,17 @@ class ConnectionManager:
                                        json=json,
                                        headers=self.__setup_headers(headers)) as response:
             return await self.__handle_response(response, 200)
+
+    @renew_access_token
+    @rate_limit
+    async def delete(self, endpoint: str, headers: dict = None):
+        async with self.__session.delete(url=self.__base_url + endpoint,
+                                         headers=self.__setup_headers(headers)) as response:
+            return await self.__handle_response(response, 204)
+
+    @renew_access_token
+    @rate_limit
+    async def delete(self, endpoint: str, headers: dict = None):
+        async with self.__session.delete(url=self.__base_url + endpoint,
+                                         headers=self.__setup_headers(headers)) as response:
+            return await self.__handle_response(response, 204)

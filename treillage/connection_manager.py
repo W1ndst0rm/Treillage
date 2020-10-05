@@ -4,7 +4,7 @@ import functools
 import time
 from .token_manager import TokenManager
 from .ratelimiter import RateLimiter
-from .exceptions import FilevineHTTPException, FilevineRateLimitException
+from .exceptions import TreillageHTTPException, TreillageRateLimitException
 
 
 def renew_access_token(func):
@@ -98,9 +98,9 @@ class ConnectionManager:
             if response.status == 429:
                 if self.__rate_limiter is not None:
                     self.__rate_limiter.last_try_success(False)
-                raise FilevineRateLimitException(url=response.url, msg=msg)
+                raise TreillageRateLimitException(url=response.url, msg=msg)
             else:
-                raise FilevineHTTPException(code=response.status, url=response.url, msg=msg)
+                raise TreillageHTTPException(code=response.status, url=response.url, msg=msg)
 
     def __setup_headers(self, headers: dict = None) -> dict:
         if not headers:
@@ -132,6 +132,13 @@ class ConnectionManager:
                                        json=json,
                                        headers=self.__setup_headers(headers)) as response:
             return await self.__handle_response(response, 200)
+
+    @renew_access_token
+    @rate_limit
+    async def delete(self, endpoint: str, headers: dict = None):
+        async with self.__session.delete(url=self.__base_url + endpoint,
+                                         headers=self.__setup_headers(headers)) as response:
+            return await self.__handle_response(response, 204)
 
     @renew_access_token
     @rate_limit

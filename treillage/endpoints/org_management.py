@@ -1,6 +1,6 @@
 from typing import List
 from .. import ConnectionManager
-from .. import FilevineTypeError, FilevineValueError
+from .. import TreillageTypeError, TreillageValueError
 from .list_paginator import list_paginator
 
 
@@ -92,14 +92,14 @@ async def update_contact(connection: ConnectionManager,
         if person_type in valid_types:
             return True
         else:
-            raise FilevineValueError(f"{person_type} not in allowed types: {', '.join(*valid_types)}")
+            raise TreillageValueError(f"{person_type} not in allowed types: {', '.join(*valid_types)}")
 
     def validate_marital_status(status) -> bool:
         valid_statuses = {"s", "m", "d", "u", "w"}
         if status in valid_statuses:
             return True
         else:
-            raise FilevineValueError(f"{status} not in allowed marital statuses of: {', '.join(*valid_statuses)}")
+            raise TreillageValueError(f"{status} not in allowed marital statuses of: {', '.join(*valid_statuses)}")
 
     endpoint = f'/core/contacts/{contact_id}'
     body = dict()
@@ -121,7 +121,7 @@ async def update_contact(connection: ConnectionManager,
         if isinstance(is_single_name, bool):
             body['isSingleName'] = is_single_name
         else:
-            raise FilevineTypeError
+            raise TreillageTypeError
     if full_name:
         body['fullName'] = full_name
     if ssn:
@@ -145,12 +145,12 @@ async def update_contact(connection: ConnectionManager,
         if isinstance(is_texting_permitted, bool):
             body['isTextingPermitted'] = is_texting_permitted
         else:
-            raise FilevineTypeError
+            raise TreillageTypeError
     if remarket:
         if isinstance(remarket, bool):
             body['remarket'] = remarket
         else:
-            raise FilevineTypeError
+            raise TreillageTypeError
     if abbreviated_name:
         body['abbreviatedName'] = abbreviated_name
     if driver_license_number:
@@ -167,16 +167,16 @@ async def update_contact(connection: ConnectionManager,
         if isinstance(phones, List):
             body['phones'] = phones
         else:
-            raise FilevineTypeError
+            raise TreillageTypeError
     if emails:
         if isinstance(emails, List):
             body['emails'] = emails
         else:
-            raise FilevineTypeError
+            raise TreillageTypeError
     if addresses:
         if isinstance(addresses, List):
             body['addresses'] = addresses
         else:
-            raise FilevineTypeError
+            raise TreillageTypeError
 
     return await connection.patch(endpoint, body)

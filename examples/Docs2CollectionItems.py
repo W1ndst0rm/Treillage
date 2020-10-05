@@ -1,4 +1,4 @@
-from filevine import Filevine, FilevineHTTPException, FilevineRateLimitException
+from treillage import Treillage, TreillageHTTPException, TreillageRateLimitException
 import asyncio
 import pandas
 import progressbar
@@ -22,8 +22,8 @@ async def main():
     ]
     # Create the progress bar
     with progressbar.ProgressBar(max_value=len(batch), widgets=widgets) as bar:
-        # Create the filevine context manager
-        async with Filevine(credentials_file, rate_limit_max_tokens=8, rate_limit_token_regen_rate=8) as fv:
+        # Create the treillage context manager
+        async with Treillage(credentials_file, rate_limit_max_tokens=8, rate_limit_token_regen_rate=8) as fv:
             # Iterate over every row in the spreadsheet
             for idx, row in batch.iterrows():
                 # Process the data from the row
@@ -60,10 +60,10 @@ async def handle_document(fv, projectid, sectionselector, collectionid, fieldsel
         await patch_collection_item(fv, endpoint, newdocids, log_data)
 
     # Retry if the GET request was rate-limited
-    except FilevineRateLimitException:
+    except TreillageRateLimitException:
         await handle_document(fv, projectid, sectionselector, collectionid, fieldselector, docids)
     # Log all other failed GET requests
-    except FilevineHTTPException as e:
+    except TreillageHTTPException as e:
         with open("error.txt", "a") as out:
             out.write(f"{e.code}\t{log_data}\t{''}\t{e.msg}\tFailed to Get\n")
 
@@ -76,10 +76,10 @@ async def patch_collection_item(fv, endpoint, json, log_data):
         with open("result.txt", "a") as out:
             out.write(f"200\t{log_data}\n")
     # Retry if the PATCH request was rate-limited
-    except FilevineRateLimitException:
+    except TreillageRateLimitException:
         await patch_collection_item(fv, endpoint, json, log_data)
     # Log all other failed PATCH requests
-    except FilevineHTTPException as e:
+    except TreillageHTTPException as e:
         with open("error.txt", "a") as out:
             out.write(f"{e.code}\t{log_data}\t{e.msg}\tFailed to Patch\n")
 

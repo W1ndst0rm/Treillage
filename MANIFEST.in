@@ -1,2 +1,2 @@
 include versioneer.py
-include filevine/_version.py
+include treillage/_version.py

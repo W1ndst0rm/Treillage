@@ -42,8 +42,8 @@ def get_config():
     cfg.VCS = "git"
     cfg.style = "pep440"
     cfg.tag_prefix = "v"
-    cfg.parentdir_prefix = "filevine-"
-    cfg.versionfile_source = "filevine/_version.py"
+    cfg.parentdir_prefix = "treillage-"
+    cfg.versionfile_source = "treillage/_version.py"
     cfg.verbose = False
     return cfg
 

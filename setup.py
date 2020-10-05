@@ -6,13 +6,13 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setup(
-    name='filevine',
+    name='treillage',
     version=versioneer.get_version(),
     cmdclass=versioneer.get_cmdclass(),
-    description='Wrapper library for the Filevine API',
+    description='Unofficial Wrapper library for the Filevine API',
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/W1ndst0rm/Filevine",
+    url="https://github.com/W1ndst0rm/Treillage",
     author='Levi Jumonville',
     packages=find_packages(),
     install_requires=[

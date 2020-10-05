@@ -1,4 +1,4 @@
-from .. import ConnectionManager, FilevineRateLimitException
+from .. import ConnectionManager, TreillageRateLimitException
 
 
 async def list_paginator(connection: ConnectionManager, endpoint: str, params: dict):
@@ -13,5 +13,5 @@ async def list_paginator(connection: ConnectionManager, endpoint: str, params: d
             params['offset'] += params['limit']
             for item in resp['items']:
                 yield item
-        except FilevineRateLimitException:
+        except TreillageRateLimitException:
             pass

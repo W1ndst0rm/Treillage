@@ -9,7 +9,7 @@ class BaseURL(Enum):
     CANADA = "https://api.filevine.ca"
 
 
-class Filevine:
+class Treillage:
     def __init__(self,
                  credentials_file: str,
                  base_url: Union[str, BaseURL] = BaseURL.UNITED_STATES.value,
@@ -39,7 +39,7 @@ class Filevine:
 
     @classmethod
     async def create(cls, credentials_file: str, base_url: BaseURL = None):
-        self = Filevine(credentials_file, base_url)
+        self = Treillage(credentials_file, base_url)
         await self.__async_init()
         return self
 

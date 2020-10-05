@@ -1,6 +1,6 @@
 import unittest
 import os
-from filevine import get_credentials, FilevineException
+from treillage import get_credentials, TreillageException
 
 
 class TestCredentialImport(unittest.TestCase):
@@ -34,7 +34,7 @@ class TestCredentialImport(unittest.TestCase):
             'queueid': 'q12345678901'
 
         }
-        with self.assertRaises(FilevineException):
+        with self.assertRaises(TreillageException):
             self.get_credentials(creds_data)
 
     def test_missing_secret(self):
@@ -43,7 +43,7 @@ class TestCredentialImport(unittest.TestCase):
             'queueid': 'q12345678901'
 
         }
-        with self.assertRaises(FilevineException):
+        with self.assertRaises(TreillageException):
             self.get_credentials(creds_data)
 
 

@@ -1,6 +1,6 @@
 import unittest
 import asyncio
-from filevine import get_credentials, TokenManager, BaseURL
+from treillage import get_credentials, TokenManager, BaseURL
 
 
 class TestTokenManager(unittest.TestCase):

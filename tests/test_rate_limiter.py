@@ -1,7 +1,7 @@
 import asyncio
 import time
 import unittest
-from filevine import RateLimiter
+from treillage import RateLimiter
 
 
 class TestRateLimiter(unittest.TestCase):

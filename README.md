@@ -23,15 +23,15 @@ Table of contents
     * [Base URL](#base-url)
 * [Rate Limiting and Connection Management](#Rate-Limiting-and-Connection-Management)
 * [Exceptions](#exceptions)
-    * [FilevineHTTPException](#FilevineHTTPException)
-    * [FilevineRateLimitException](#FilevineRateLimitException)
-    * [FilevineTypeError](#FilevineTypeError)
-    * [FilevineValueError](#FilevineValueError)
+    * [TreillageHTTPException](#FilevineHTTPException)
+    * [TreillageRateLimitException](#FilevineRateLimitException)
+    * [TreillageTypeError](#FilevineTypeError)
+    * [TreillageValueError](#FilevineValueError)
 * [Examples](#examples)
 <!--te-->
 ## Library Installation
 ```shell script
-pip install filevine
+pip install treillage
 ```
 
 Getting Started
@@ -51,11 +51,11 @@ These tokens are refreshed as needed throughout script execution.
 Using built-in endpoints
 ------------------------
 ```python
-from filevine import Filevine
-from filevine.endpoints import get_contact_list
+from treillage import Treillage
+from treillage.endpoints import get_contact_list
 
-async with Filevine(credentials_file="creds.yml") as fv:
-    async for contact in get_contact_list(fv.conn, fields=['fullName', 'personId'], first_name='James'):
+async with Treillage(credentials_file="creds.yml") as tr:
+    async for contact in get_contact_list(tr.conn, fields=['fullName', 'personId'], first_name='James'):
         print(contact['fullName'])
 ```
 This will request the `personId` and `fullName` fields for all contacts with the first name of 'James'.
@@ -65,11 +65,11 @@ Using raw HTTP methods
 If there isn't a function written for the built-in endpoint you need, you can still use the rate limiting
 and credential rotation features
 ```python
-from filevine import Filevine
+from treillage import Treillage
 
-async with Filevine(credentials_file="creds.yml") as fv:
+async with Treillage(credentials_file="creds.yml") as tr:
     query_parameters = {'requestedFields': ['fullName, personId'], 'firstName': 'James', 'offset': 0, 'limit': 50}
-    contacts = await fv.conn.get(endpoint='/core/contacts', params=query_parameters)
+    contacts = await tr.conn.get(endpoint='/core/contacts', params=query_parameters)
     for contact in contacts:
         print(contact['fullName'])
 ```
@@ -77,9 +77,9 @@ This will request the `personId` and `fullName` fields for the first 50 contacts
 
 POST and DELETE work similarly
 ```python
-from filevine import Filevine
+from treillage import Treillage
 
-async with Filevine(credentials_file="creds.yml") as fv:
+async with Treillage(credentials_file="creds.yml") as tr:
     # POST Example
     body = {
         'firstName' : 'John',
@@ -88,9 +88,9 @@ async with Filevine(credentials_file="creds.yml") as fv:
         'gender': 'M',
         'personTypes': ['Client'] 
     }
-    response = await fv.conn.post(endpoint='/core/contacts', json=body)
+    response = await tr.conn.post(endpoint='/core/contacts', json=body)
     # DELETE Example
-    await fv.conn.delete(endpoint='/core/documents/1234')
+    await tr.conn.delete(endpoint='/core/documents/1234')
 ```
 
 Base URL
@@ -98,13 +98,13 @@ Base URL
 The base url for the server defaults to United States server at https://api.filevine.io.
 To access the Canada specific server pass in the base_url parameter
 ```python
-from filevine import Filevine, BaseURL
+from treillage import Treillage, BaseURL
 
 # Use the built-in Enum
-async with Filevine(credentials_file="creds.yml", base_url=BaseURL.CANADA) as fv:
+async with Treillage(credentials_file="creds.yml", base_url=BaseURL.CANADA) as tr:
 
 # Pass in a string
-async with Filevine(credentials_file="creds.yml", base_url='https://api.filevine.ca') as fv:
+async with Treillage(credentials_file="creds.yml", base_url='https://api.filevine.ca') as tr:
 ```
 
 Rate Limiting and Connection Management
@@ -119,8 +119,8 @@ To use the built-in rate limiter, two parameters must be passed to the filevine 
 
 If either one of the parameters is not set, no rate-limiting will occur.
 ```python
-async with Filevine(credentials_file="creds.yml", rate_limit_max_tokens=10, rate_limit_token_regen_rate=10) as fv:
-    fv.do_something()
+async with Treillage(credentials_file="creds.yml", rate_limit_max_tokens=10, rate_limit_token_regen_rate=10) as tr:
+    tr.do_something()
 ```
 Additionally, the rate limiter will use an exponential backoff algorithm to
 temporarily slow down requests when the server returns a HTTP 429 error (Rate Limit Exceeded). 
@@ -131,36 +131,36 @@ the `max_connections` parameter. If `max_connections` is not set, the default va
 Exceptions
 ==========
 The filevine module includes several exceptions to make error handling easier.
-All exceptions inherit from `FilevineException`.
+All exceptions inherit from `TreillageException`.
 
-FilevineHTTPException
+TreillageHTTPException
 ---------------------
-* Inherits from `FilevineException`
+* Inherits from `TreillageException`
 * This exception is raised when the API returns any non 200 status code. 
 * Parameters:
     * code - The HTTP error code
     * url - The url accessed
     * msg - The body of the server response or `"Received non-2xx HTTP Status Code {code}"`
 
-FilevineRateLimitException
+TreillageRateLimitException
 --------------------------
-* Inherits from `FilevineHTTPException`
+* Inherits from `TreillageHTTPException`
 * This exception is raised when the API returns a 429 status code (Rate Limit Exceeded). 
 * Parameters:
     * code - The HTTP error code. *It will always be 429*
     * url - The url accessed
     * msg - The body of the server response or `"Received non-2xx HTTP Status Code 429"`
 
-FilevineTypeError
+TreillageTypeError
 -----------------
-* Inherits from `FilevineException` and `TypeError`
+* Inherits from `TreillageException` and `TypeError`
 * Raised when a parameter for an endpoint does not match the required type
 * Parameters
     * msg
 
-FilevineValueError
+TreillageValueError
 ------------------
-* Inherits from `FilevineException` and `ValueError`
+* Inherits from `TreillageException` and `ValueError`
 * Raised when a parameter for an endpoint does not meet the requirements in the endpoint specification.
 For example, a contact's personTypes must be in the list `['Adjuster', 'Attorney', 'Client', 'Court',
 'Defendant', 'Plaintiff', 'Expert', 'Firm', 'Insurance Company', 'Involved Party', 'Judge', 'Medical Provider']`

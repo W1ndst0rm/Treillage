@@ -35,4 +35,4 @@ jobs:
         CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
       with:
         coverageCommand: coverage run -m pytest
-        coverageLocations: .coverage:CoveragePy
+        coverageLocations: .coverage:coverage

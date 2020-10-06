@@ -1,4 +1,4 @@
-import aiohttp
+from aiohttp import ClientSession
 import asyncio
 from datetime import datetime
 from enum import Enum
@@ -82,7 +82,7 @@ class TokenManager:
         else:
             raise TreillageException(msg="Invalid Token Request Type")
         try:
-            async with aiohttp.ClientSession() as session:
+            async with ClientSession() as session:
                 async with session.post(self.__auth_url,
                                         json=request_body) as resp:
                     if resp.status == 200:

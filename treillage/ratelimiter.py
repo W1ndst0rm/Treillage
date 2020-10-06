@@ -32,15 +32,25 @@ class RateLimiter:
 
     @tokens.setter
     def tokens(self, i):
-        self.__tokens = max(min(i, self.__MAX_TOKENS), 0)  # Must be between 0 and MAX_TOKENS
+        # Must be between 0 and MAX_TOKENS
+        self.__tokens = max(min(i, self.__MAX_TOKENS), 0)
 
     def last_try_success(self, i: bool):
         self.__last_try_success = i
         if not i:
             self.__failed_attempts += 1
-            self.__backoff_time = random.randint(0, min(32000, 100 * 2 ** self.__failed_attempts)) / 1000  # ms to s
+            self.__backoff_time = random.randint(
+                0,
+                min(
+                    32000,
+                    100 * 2 ** self.__failed_attempts
+                )
+            ) / 1000  # ms to s
         else:
-            self.__failed_attempts = max(0, self.__failed_attempts - self.__MAX_TOKENS / 3)
+            self.__failed_attempts = max(
+                0,
+                self.__failed_attempts - self.__MAX_TOKENS / 3
+            )
 
     def __add_new_token(self) -> bool:
         if self.__last_try_success or self.__waited_after_failure:

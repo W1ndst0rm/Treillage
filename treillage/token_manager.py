@@ -29,7 +29,9 @@ class TokenManager:
     @classmethod
     async def create(cls, credentials, base_url):
         self = TokenManager(credentials, base_url)
-        self.__set_tokens(await self.__request_tokens(request_type=TokenRequestType.KEY))
+        self.__set_tokens(
+            await self.__request_tokens(request_type=TokenRequestType.KEY)
+        )
         return self
 
     @property
@@ -56,7 +58,9 @@ class TokenManager:
 
     async def __request_tokens(self, request_type: TokenRequestType):
         timestamp = self.get_timestamp()
-        api_hash = self.create_hash(self.__API_KEY, timestamp, self.__API_SECRET)
+        api_hash = self.create_hash(self.__API_KEY,
+                                    timestamp,
+                                    self.__API_SECRET)
 
         if request_type == TokenRequestType.KEY:
             request_body = {
@@ -79,17 +83,23 @@ class TokenManager:
             raise TreillageException(msg="Invalid Token Request Type")
         try:
             async with aiohttp.ClientSession() as session:
-                async with session.post(self.__auth_url, json=request_body) as resp:
+                async with session.post(self.__auth_url,
+                                        json=request_body) as resp:
                     if resp.status == 200:
                         return await resp.json()
                     else:
-                        raise TreillageHTTPException(resp.status, msg='Failed to get API tokens', url=self.__auth_url)
+                        raise TreillageHTTPException(
+                            resp.status,
+                            msg='Failed to get API tokens',
+                            url=self.__auth_url
+                        )
         finally:
             await asyncio.sleep(0.250)
 
     def __set_tokens(self, tokens: dict):
         self.__access_token = tokens["accessToken"]
-        self.__access_token_expiry = jwt.decode(tokens['accessToken'], verify=False)['exp']
+        self.__access_token_expiry = jwt.decode(tokens['accessToken'],
+                                                verify=False)['exp']
         self.__refresh_token = tokens["refreshToken"]
         self.__refresh_token_expiry = tokens["refreshTokenExpiry"]
         self.__refresh_token_ttl = tokens["refreshTokenTtl"]
@@ -104,4 +114,6 @@ class TokenManager:
         pass
 
     async def refresh_access_token(self):
-        self.__set_tokens(await self.__request_tokens(TokenRequestType.SESSION))
+        self.__set_tokens(
+            await self.__request_tokens(TokenRequestType.SESSION)
+        )

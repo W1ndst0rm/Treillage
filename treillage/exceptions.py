@@ -27,7 +27,8 @@ class TreillageRateLimitException(TreillageHTTPException):
 
 class TreillageTypeError(TreillageException, TypeError):
     def __init__(self, expected_type, received_type):
-        msg = f"Type {expected_type} required in API definition, but received {received_type}"
+        msg = (f"Type {expected_type} required in API definition, " +
+               f"but received {received_type}")
         super(TreillageTypeError, self).__init__(msg=msg)
 
 

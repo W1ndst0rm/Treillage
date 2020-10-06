@@ -10,7 +10,8 @@ from .exceptions import TreillageHTTPException, TreillageRateLimitException
 def renew_access_token(func):
     @functools.wraps(func)
     async def wrapped(self, *args, **kwargs):
-        if time.time() > self.token_manager.access_token_expiry - 90:  # Refresh the token 90 seconds before it expires
+        # Refresh the token 90 seconds before it expires
+        if time.time() > self.token_manager.access_token_expiry - 90:
             await self.token_manager.refresh_access_token()
         return await func(self, *args, **kwargs)
 
@@ -38,13 +39,19 @@ class ConnectionManager:
         self.__base_url = base_url
         self.__credentials = credentials
         if max_connections is not None:
-            self.__connector = aiohttp.TCPConnector(limit_per_host=max_connections)
+            self.__connector = aiohttp.TCPConnector(
+                limit_per_host=max_connections
+            )
         else:
             self.__connector = None
         self.__session = None
-        self.__token_manager = None
-        if rate_limit_max_tokens is not None and rate_limit_token_regen_rate is not None:
-            self.__rate_limiter = RateLimiter(rate_limit_max_tokens, rate_limit_token_regen_rate)
+        self.__auth_tokens = None
+        if not (rate_limit_max_tokens is None or
+                rate_limit_token_regen_rate is None):
+            self.__rate_limiter = RateLimiter(
+                token_count=rate_limit_max_tokens,
+                token_rate=rate_limit_token_regen_rate
+            )
         else:
             self.__rate_limiter = None
 
@@ -57,9 +64,14 @@ class ConnectionManager:
                      rate_limit_token_regen_rate: int = None
                      ):
 
-        self = ConnectionManager(base_url, credentials, max_connections, rate_limit_max_tokens,
-                                 rate_limit_token_regen_rate)
-        self.__token_manager = await TokenManager.create(credentials, base_url)
+        self = ConnectionManager(
+            base_url,
+            credentials,
+            max_connections,
+            rate_limit_max_tokens,
+            rate_limit_token_regen_rate
+        )
+        self.__auth_tokens = await TokenManager.create(credentials, base_url)
         if self.connector:
             self.__session = aiohttp.ClientSession(
                 timeout=aiohttp.ClientTimeout(total=90),
@@ -74,11 +86,12 @@ class ConnectionManager:
     async def close(self):
         if self.__session is not None:
             await self.__session.close()
-            await asyncio.sleep(0.250)  # Sleep to give connections time to close
+            # Sleep to give connections time to close
+            await asyncio.sleep(0.250)
 
     @property
     def token_manager(self) -> TokenManager:
-        return self.__token_manager
+        return self.__auth_tokens
 
     @property
     def rate_limiter(self) -> RateLimiter:
@@ -100,49 +113,68 @@ class ConnectionManager:
                     self.__rate_limiter.last_try_success(False)
                 raise TreillageRateLimitException(url=response.url, msg=msg)
             else:
-                raise TreillageHTTPException(code=response.status, url=response.url, msg=msg)
+                raise TreillageHTTPException(
+                    code=response.status,
+                    url=response.url,
+                    msg=msg
+                )
 
     def __setup_headers(self, headers: dict = None) -> dict:
         if not headers:
             headers = dict()
-        headers["x-fv-sessionid"] = self.__token_manager.refresh_token
-        headers["Authorization"] = f"Bearer {self.__token_manager.access_token}"
+        headers["x-fv-sessionid"] = self.__auth_tokens.refresh_token
+        headers["Authorization"] = f"Bearer {self.__auth_tokens.access_token}"
         return headers
 
     @renew_access_token
     @rate_limit
-    async def get(self, endpoint: str, params: dict = None, headers: dict = None):
-        async with self.__session.get(url=self.__base_url + endpoint,
-                                      params=params,
-                                      headers=self.__setup_headers(headers)) as response:
+    async def get(
+            self,
+            endpoint: str,
+            params: dict = None,
+            headers: dict = None
+    ):
+        async with self.__session.get(
+                url=self.__base_url + endpoint,
+                params=params,
+                headers=self.__setup_headers(headers)
+        ) as response:
             return await self.__handle_response(response, 200)
 
     @renew_access_token
     @rate_limit
     async def patch(self, endpoint: str, json: dict, headers: dict = None):
-        async with self.__session.patch(url=self.__base_url + endpoint,
-                                        json=json,
-                                        headers=self.__setup_headers(headers)) as response:
+        async with self.__session.patch(
+                url=self.__base_url + endpoint,
+                json=json,
+                headers=self.__setup_headers(headers)
+        ) as response:
             return await self.__handle_response(response, 200)
 
     @renew_access_token
     @rate_limit
     async def post(self, endpoint: str, json: dict, headers: dict = None):
-        async with self.__session.post(url=self.__base_url + endpoint,
-                                       json=json,
-                                       headers=self.__setup_headers(headers)) as response:
+        async with self.__session.post(
+                url=self.__base_url + endpoint,
+                json=json,
+                headers=self.__setup_headers(headers)
+        ) as response:
             return await self.__handle_response(response, 200)
 
     @renew_access_token
     @rate_limit
     async def delete(self, endpoint: str, headers: dict = None):
-        async with self.__session.delete(url=self.__base_url + endpoint,
-                                         headers=self.__setup_headers(headers)) as response:
+        async with self.__session.delete(
+                url=self.__base_url + endpoint,
+                headers=self.__setup_headers(headers)
+        ) as response:
             return await self.__handle_response(response, 204)
 
     @renew_access_token
     @rate_limit
     async def delete(self, endpoint: str, headers: dict = None):
-        async with self.__session.delete(url=self.__base_url + endpoint,
-                                         headers=self.__setup_headers(headers)) as response:
+        async with self.__session.delete(
+                url=self.__base_url + endpoint,
+                headers=self.__setup_headers(headers)
+        ) as response:
             return await self.__handle_response(response, 204)

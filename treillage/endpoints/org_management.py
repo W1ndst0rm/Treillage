@@ -9,7 +9,11 @@ from .list_paginator import list_paginator
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
 
-async def get_contact(connection: ConnectionManager, contact_id: str, fields: List[str] = None):
+async def get_contact(
+        connection: ConnectionManager,
+        contact_id: str,
+        fields: List[str] = None
+):
     endpoint = f'/core/contacts/{contact_id}'
     params = dict()
     if fields:
@@ -64,19 +68,19 @@ async def update_contact(connection: ConnectionManager,
                          first_name: str = None,
                          middle_name: str = None,
                          last_name: str = None,
-                         is_single_name: bool = None,  # True = Company, False = Individual
+                         is_single_name: bool = None,
                          full_name: str = None,
-                         ssn: str = None,  # Displays as "Tax ID" for Companies (i.e. isSingleName = False)
+                         ssn: str = None,
                          birthdate: str = None,
                          notes: str = None,
                          from_company: str = None,
                          specialty: str = None,
-                         gender: str = None,  # M = Male, F = Female
+                         gender: str = None,
                          language: str = None,
-                         marital_status: str = None,  # Single Character Values Only Accepted Values:"s","m","d","u","w"
+                         marital_status: str = None,
                          is_texting_permitted: bool = None,
                          remarket: bool = None,
-                         abbreviated_name: str = None,  # Nickname
+                         abbreviated_name: str = None,
                          driver_license_number: str = None,
                          salutation: str = None,
                          bar_number: str = None,
@@ -87,19 +91,26 @@ async def update_contact(connection: ConnectionManager,
                          addresses: List = None,
                          ):
     def validate_person_type(person_type) -> bool:
-        valid_types = {'Adjuster', 'Attorney', 'Client', 'Court', 'Defendant', 'Plaintiff', 'Expert', 'Firm',
-                       'Insurance Company', 'Involved Party', 'Judge', 'Medical Provider'}
+        valid_types = {'Adjuster', 'Attorney', 'Client', 'Court', 'Defendant',
+                       'Plaintiff', 'Expert', 'Firm', 'Insurance Company',
+                       'Involved Party', 'Judge', 'Medical Provider'}
         if person_type in valid_types:
             return True
         else:
-            raise TreillageValueError(f"{person_type} not in allowed types: {', '.join(*valid_types)}")
+            raise TreillageValueError(
+                f"{person_type} not in allowed types: " +
+                f"{', '.join(*valid_types)}"
+            )
 
     def validate_marital_status(status) -> bool:
         valid_statuses = {"s", "m", "d", "u", "w"}
         if status in valid_statuses:
             return True
         else:
-            raise TreillageValueError(f"{status} not in allowed marital statuses of: {', '.join(*valid_statuses)}")
+            raise TreillageValueError(
+                f"{status} not in allowed marital statuses of:" +
+                f"{', '.join(*valid_statuses)}"
+            )
 
     endpoint = f'/core/contacts/{contact_id}'
     body = dict()
@@ -138,7 +149,8 @@ async def update_contact(connection: ConnectionManager,
         body['gender'] = gender
     if language:
         body['language'] = language
-    if marital_status:  # Single Character Values Only Accepted Values: "s","m","d","u","w"
+    if marital_status:
+        # Single Character Values Only Accepted Values: "s","m","d","u","w"
         if validate_marital_status(marital_status):
             body['maritalStatus'] = marital_status
     if is_texting_permitted:

@@ -60,7 +60,11 @@ class TestRateLimiter(unittest.TestCase):
         asyncio.run(rl.get_token())
         end = time.monotonic()
         elapsed = end - start
-        self.assertAlmostEqual(elapsed, 1/rl._RateLimiter__token_rate + rl._RateLimiter__backoff_time, delta=.025)
+        self.assertAlmostEqual(
+            elapsed,
+            1/rl._RateLimiter__token_rate + rl._RateLimiter__backoff_time,
+            delta=.025
+        )
 
 
 if __name__ == '__main__':

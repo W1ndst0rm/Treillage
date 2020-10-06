@@ -29,12 +29,12 @@ jobs:
         python -m pip install --upgrade pip
         pip install pytest coverage
         pip install -r requirements.txt
-    - name: Test and publish code coverage
+    - name: Test code and generate coverage file
+      run: coverage run -m pytest
+    - name: Format and publish code coverage
       uses: paambaati/codeclimate-action@v2.7.4
       env:
         CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
       with:
-        coverageCommand: |
-          coverage run -m pytest
-          coverage xml
+        coverageCommand: coverage xml
         coverageLocations: coverage.xml:coverage.py

@@ -62,7 +62,8 @@ class TestRateLimiter(unittest.TestCase):
         elapsed = end - start
         self.assertAlmostEqual(
             elapsed,
-            1/rl._RateLimiter__token_rate + rl._RateLimiter__backoff_time,
+            (1/rl._RateLimiter__token_rate +
+             rl._RateLimiter__get_backoff_time()),
             delta=.025
         )
 

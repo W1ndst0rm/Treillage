@@ -19,7 +19,7 @@ class TestCredentialImport(unittest.TestCase):
     def test_success(self):
         creds_data = {
             'key': 'fvpk_00000000-0000-0000-0000-000000000000',
-            'secret': 'fvsk_0000000000000000000000000000000000000000000000000000000000000000',
+            'secret': 'fvsk_0000000000000000000000000000000000000000000000000',
             'queueid': 'q12345678901'
 
         }
@@ -30,7 +30,7 @@ class TestCredentialImport(unittest.TestCase):
 
     def test_missing_key(self):
         creds_data = {
-            'secret': 'fvsk_0000000000000000000000000000000000000000000000000000000000000000',
+            'secret': 'fvsk_0000000000000000000000000000000000000000000000000',
             'queueid': 'q12345678901'
 
         }

@@ -10,9 +10,9 @@ class TestTokenManager(unittest.TestCase):
             # base_url = BaseURL.UNITED_STATES.value
             credentials = get_credentials('../credentials/creds.yml')
             async with TokenManager(credentials, base_url) as tm:
-                self.assertTrue(tm.access_token is not None)
-                self.assertTrue(tm.access_token_expiry is not None)
-                self.assertTrue(tm.refresh_token is not None)
+                self.assertIsNotNone(tm.access_token)
+                self.assertIsNotNone(tm.access_token_expiry)
+                self.assertIsNotNone(tm.refresh_token)
         asyncio.run(test())
 
     def test_async_create(self):
@@ -21,9 +21,9 @@ class TestTokenManager(unittest.TestCase):
             # base_url = BaseURL.UNITED_STATES.value
             credentials = get_credentials('../credentials/creds.yml')
             tm = await TokenManager.create(credentials, base_url)
-            self.assertTrue(tm.access_token is not None)
-            self.assertTrue(tm.access_token_expiry is not None)
-            self.assertTrue(tm.refresh_token is not None)
+            self.assertIsNotNone(tm.access_token)
+            self.assertIsNotNone(tm.access_token_expiry)
+            self.assertIsNotNone(tm.refresh_token)
         asyncio.run(test())
 
     def test_refresh_access_token(self):
@@ -37,9 +37,11 @@ class TestTokenManager(unittest.TestCase):
                 old_refresh_token = tm.refresh_token
                 await asyncio.sleep(5)
                 await tm.refresh_access_token()
-                self.assertTrue(old_access_token != tm.access_token)
-                self.assertTrue(old_refresh_token != tm.refresh_token)
-                self.assertTrue(old_access_token_expiry < tm.access_token_expiry)
+                self.assertNotEqual(old_access_token, tm.access_token)
+                self.assertNotEqual(old_refresh_token, tm.refresh_token)
+                self.assertLess(
+                    old_access_token_expiry, tm.access_token_expiry
+                )
         asyncio.run(test())
 
 

@@ -1,4 +1,6 @@
-from treillage import Treillage, TreillageHTTPException, TreillageRateLimitException
+from treillage import (Treillage,
+                       TreillageHTTPException,
+                       TreillageRateLimitException)
 import asyncio
 import pandas
 import progressbar
@@ -21,39 +23,61 @@ async def main():
         ' [', progressbar.Timer(), '] ',
     ]
     # Create the progress bar
-    with progressbar.ProgressBar(max_value=len(batch), widgets=widgets) as bar:
+    with progressbar.ProgressBar(maxval=len(batch), widgets=widgets) as bar:
         # Create the treillage context manager
-        async with Treillage(credentials_file, rate_limit_max_tokens=8, rate_limit_token_regen_rate=8) as fv:
+        async with Treillage(
+                credentials_file,
+                rate_limit_max_tokens=8,
+                rate_limit_token_regen_rate=8
+        ) as fv:
             # Iterate over every row in the spreadsheet
             for idx, row in batch.iterrows():
                 # Process the data from the row
-                await handle_document(fv=fv,
-                                      projectid=row["__ProjectID"],
-                                      sectionselector=row["SectionSelector"],
-                                      collectionid=row["__CollectionItemGuid"],
-                                      fieldselector=row["FieldSelector"],
-                                      docids=json.loads(row["JSON__DocIDs"])
-                                      )
+                await handle_document(
+                    fv=fv,
+                    projectid=row["__ProjectID"],
+                    sectionselector=row["SectionSelector"],
+                    collectionid=row["__CollectionItemGuid"],
+                    fieldselector=row["FieldSelector"],
+                    docids=json.loads(row["JSON__DocIDs"])
+                )
                 # Update the position of the progress bar
                 bar.update(idx)
 
 
-async def handle_document(fv, projectid, sectionselector, collectionid, fieldselector, docids):
+async def handle_document(
+        fv,
+        projectid,
+        sectionselector,
+        collectionid,
+        fieldselector,
+        docids
+):
     # Set the endpoint that will be requested
-    endpoint = f'/core/projects/{projectid}/collections/{sectionselector}/{collectionid}'
+    endpoint = f'/core/projects/{projectid}/collections/{sectionselector}/' \
+               f'{collectionid}'
     # Format parameters for the log file
-    log_data = f'{projectid}\t{sectionselector}\t{fieldselector}\t{collectionid}\t{docids}'
+    log_data = f'{projectid}\t{sectionselector}\t{fieldselector}\t' \
+               f'{collectionid}\t{docids}'
     # Use a try-except block to handle errors
     try:
         # get fieldselector info about the requested collection
-        resp = await fv.conn.get(endpoint=endpoint, params={'requestedFields': fieldselector})
-        # create a deep copy of the dictionary so nested data can be edited separate from the original values
+        resp = await fv.conn.get(
+            endpoint=endpoint,
+            params={'requestedFields': fieldselector}
+        )
+        # Create a deep copy of the dictionary so nested data
+        # can be edited separate from the original values
         newdocids = copy.deepcopy(docids)
 
-        # If needed, update docIDs based on the data returned from the GET request
-        if fieldselector in resp["dataObject"].keys() and len(resp["dataObject"][fieldselector]) > 0:
+        # If needed, update docIDs based on
+        # the data returned from the GET request
+        if (fieldselector in resp["dataObject"].keys() and
+                len(resp["dataObject"][fieldselector]) > 0):
             requestedfield = resp["dataObject"][fieldselector]
-            newdocids["dataObject"][fieldselector] = newdocids["dataObject"][fieldselector] + requestedfield
+            newdocids["dataObject"][fieldselector] = (
+                    newdocids["dataObject"][fieldselector] + requestedfield
+            )
         # Update formatted log data with new values
         log_data = log_data + "\t" + str(newdocids)
         # Patch the collection item with the additional docIDs
@@ -61,7 +85,14 @@ async def handle_document(fv, projectid, sectionselector, collectionid, fieldsel
 
     # Retry if the GET request was rate-limited
     except TreillageRateLimitException:
-        await handle_document(fv, projectid, sectionselector, collectionid, fieldselector, docids)
+        await handle_document(
+            fv,
+            projectid,
+            sectionselector,
+            collectionid,
+            fieldselector,
+            docids
+        )
     # Log all other failed GET requests
     except TreillageHTTPException as e:
         with open("error.txt", "a") as out:

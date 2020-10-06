@@ -119,9 +119,8 @@ async def update_contact(connection: ConnectionManager,
         for p_type in person_types:
             if validate_person_type(p_type):
                 body["personTypes"].append(p_type)
-    if person_id:
-        if isinstance(person_id, dict):
-            body["personId"] = person_id
+    if person_id and isinstance(person_id, dict):
+        body["personId"] = person_id
     if first_name:
         body['firstName'] = first_name
     if middle_name:
@@ -149,10 +148,9 @@ async def update_contact(connection: ConnectionManager,
         body['gender'] = gender
     if language:
         body['language'] = language
-    if marital_status:
-        # Single Character Values Only Accepted Values: "s","m","d","u","w"
-        if validate_marital_status(marital_status):
-            body['maritalStatus'] = marital_status
+    # Single Character Values Only Accepted Values: "s","m","d","u","w"
+    if marital_status and validate_marital_status(marital_status):
+        body['maritalStatus'] = marital_status
     if is_texting_permitted:
         if isinstance(is_texting_permitted, bool):
             body['isTextingPermitted'] = is_texting_permitted

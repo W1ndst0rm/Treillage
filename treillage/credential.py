@@ -16,4 +16,7 @@ class Credential:
                 msg=("Credentials file must contain 'key' and 'secret'"
                      "as top level key-value pairs"))
         else:
-            return Credential(credentials_data['key'], credentials_data['secret'])
+            return Credential(
+                credentials_data['key'],
+                credentials_data['secret']
+            )

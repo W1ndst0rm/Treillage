@@ -41,7 +41,7 @@ class TestRateLimiter(unittest.TestCase):
         rl._RateLimiter__add_new_token()
         self.assertEqual(10, rl.tokens)
 
-    def test_wait_for_token(self):
+    def test_get_token(self):
         rl = RateLimiter(token_rate=10)
         rl.tokens = 0
         start = time.monotonic()
@@ -60,11 +60,9 @@ class TestRateLimiter(unittest.TestCase):
         asyncio.run(rl.get_token())
         end = time.monotonic()
         elapsed = end - start
-        self.assertAlmostEqual(
+        self.assertGreater(
             elapsed,
-            (1/rl._RateLimiter__token_rate +
-             rl._RateLimiter__get_backoff_time()),
-            delta=.025
+            1 / rl._RateLimiter__token_rate
         )
 
 

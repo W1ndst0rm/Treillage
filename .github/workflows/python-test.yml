@@ -34,5 +34,7 @@ jobs:
       env:
         CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
       with:
-        coverageCommand: coverage run -m pytest
-        coverageLocations: .coverage:coverage.py
+        coverageCommand: |
+          coverage run -m pytest
+          coverage xml
+        coverageLocations: coverage.xml:coverage.py

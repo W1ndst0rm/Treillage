@@ -1,7 +1,5 @@
-import sys
-from os.path import dirname
 from setuptools import setup, find_packages
-sys.path.append(dirname(__file__))
+
 import versioneer
 
 with open("README.md", "r") as fh:

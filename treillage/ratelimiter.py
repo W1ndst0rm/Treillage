@@ -15,7 +15,6 @@ class RateLimiter:
         self.__last_update = time.monotonic()
         self.__max_backoff_time = max_backoff_time
         self.__last_try_success = True
-        self.__waited_after_failure = False
         self.__failed_attempts = 0
 
     async def get_token(self):
@@ -24,7 +23,6 @@ class RateLimiter:
             await asyncio.sleep(
                 self.__get_backoff_time_ms() / 1000  # convert ms to seconds
             )
-            self.__waited_after_failure = True
         # Regen tokens if there aren't any available
         while self.__tokens < 1:
             await self.__wait_for_token()
@@ -57,9 +55,13 @@ class RateLimiter:
             )
 
     def __get_backoff_time_ms(self) -> float:
-        """Return a random amount of time in milliseconds between 100ms and an
-        upper limit of 2^num_failed_attempts * 100. To avoid overflow, limit
-        the maximum exponent so that max_backoff_time is never exceeded"""
+        """
+        Return time in milliseconds to backoff after a failed request
+
+        Returns a random amount of time in milliseconds between 100ms and an
+        upper limit of 2^num_failed_attempts * 100. To avoid overflow, the
+        maximum exponent is limited so that max_backoff_time is never exceeded
+        """
         return random.randint(
             100,  # minimum 100ms
             # The ceil function is working in tenths of seconds,

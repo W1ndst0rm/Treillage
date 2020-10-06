@@ -2,8 +2,7 @@ from ._version import get_versions
 from .treillage import Treillage
 from .treillage import BaseURL
 from .exceptions import *
-from .models import ModelFactory
-from .config import get_credentials
+from .credential import Credential
 from .ratelimiter import RateLimiter
 from .token_manager import TokenManager
 from .connection_manager import ConnectionManager

@@ -4,7 +4,7 @@ import unittest
 from unittest.mock import patch
 from secrets import token_urlsafe
 import asyncio
-from treillage import ModelFactory, TokenManager
+from treillage import Credential, TokenManager
 
 
 async def mock_json():
@@ -34,7 +34,7 @@ async def mock_json():
 class TestTokenManager(unittest.TestCase):
     def setUp(self) -> None:
         self.base_url = 'http://127.0.0.1'
-        self.credentials = ModelFactory({'key': '', 'secret': ''})
+        self.credentials = Credential(key='', secret='')
         patcher = patch('treillage.token_manager.ClientSession.post')
         mock_post = patcher.start()
         mock_response = mock_post.return_value.__aenter__.return_value

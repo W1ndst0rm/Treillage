@@ -10,16 +10,17 @@ setup(
     version=versioneer.get_version(),
     cmdclass=versioneer.get_cmdclass(),
     description='Unofficial Wrapper library for the Filevine API',
+    license='MIT',
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/W1ndst0rm/Treillage",
     author='Levi Jumonville',
     packages=find_packages(),
     install_requires=[
-        'aiohttp',
-        'pandas',
-        'PyYAML',
-        'PyJWT'
+        'aiohttp>=3,<4',
+        'pandas>=1,<2',
+        'PyYAML>=5,<6',
+        'PyJWT>=1.6.4,<2'
     ],
     classifiers=[
         "Programming Language :: Python :: 3.8",

@@ -169,12 +169,3 @@ class ConnectionManager:
                 headers=self.__setup_headers(headers)
         ) as response:
             return await self.__handle_response(response, 204)
-
-    @renew_access_token
-    @rate_limit
-    async def delete(self, endpoint: str, headers: dict = None):
-        async with self.__session.delete(
-                url=self.__base_url + endpoint,
-                headers=self.__setup_headers(headers)
-        ) as response:
-            return await self.__handle_response(response, 204)

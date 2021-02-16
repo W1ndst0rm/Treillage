@@ -2,6 +2,8 @@ Unofficial Wrapper library for the Filevine API
 ====================================
 [![PyPI version](https://badge.fury.io/py/treillage.svg)](https://pypi.org/project/treillage)
 [![Maintainability](https://api.codeclimate.com/v1/badges/1c532739b0c748e39242/maintainability)](https://codeclimate.com/github/W1ndst0rm/Treillage/maintainability)
+[![Test Coverage](https://api.codeclimate.com/v1/badges/1c532739b0c748e39242/test_coverage)](https://codeclimate.com/github/W1ndst0rm/Treillage/test_coverage)
+![Tests](https://github.com/W1ndst0rm/Treillage/workflows/Tests/badge.svg)
 
 *Treillage (tre-ˈyäzh): A lattice or framework for supporting vines.*
 

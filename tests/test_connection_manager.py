@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 import unittest
 from unittest.mock import patch
 from treillage import (ConnectionManager, RateLimiter, TokenManager,
-                       ModelFactory, TreillageHTTPException,
+                       Credential, TreillageHTTPException,
                        TreillageRateLimitException)
 
 
@@ -60,7 +60,7 @@ class TestConnectionManager(unittest.TestCase):
         async def test():
             conn = await ConnectionManager.create(
                 base_url='http://127.0.0.1:4010',
-                credentials=ModelFactory({'key': '', 'secret': ''})
+                credentials=Credential(key='', secret='')
             )
             self.assertIsNone(conn.connector)
             self.assertIsNone(conn.rate_limiter)
@@ -69,7 +69,7 @@ class TestConnectionManager(unittest.TestCase):
 
             conn = await ConnectionManager.create(
                 base_url='http://127.0.0.1:4010',
-                credentials=ModelFactory({'key': '', 'secret': ''}),
+                credentials=Credential(key='', secret=''),
                 max_connections=20,
                 rate_limit_token_regen_rate=10
             )
@@ -80,7 +80,7 @@ class TestConnectionManager(unittest.TestCase):
 
             conn = await ConnectionManager.create(
                 base_url='http://127.0.0.1:4010',
-                credentials=ModelFactory({'key': '', 'secret': ''}),
+                credentials=Credential(key='', secret=''),
                 rate_limit_max_tokens=25,
                 rate_limit_token_regen_rate=10
             )
@@ -94,7 +94,7 @@ class TestConnectionManager(unittest.TestCase):
         async def test():
             conn = await ConnectionManager.create(
                 base_url='http://127.0.0.1:4010',
-                credentials=ModelFactory({'key': '', 'secret': ''})
+                credentials=Credential(key='', secret='')
             )
             headers = conn._ConnectionManager__setup_headers({
                 "Accept-Encoding": "gzip, deflate, br",
@@ -124,7 +124,7 @@ class TestConnectionManager(unittest.TestCase):
         async def test():
             conn = await ConnectionManager.create(
                 base_url='http://127.0.0.1:4010',
-                credentials=ModelFactory({'key': '', 'secret': ''})
+                credentials=Credential(key='', secret='')
             )
             response = MockResponse(200)
             self.assertEqual(
@@ -156,7 +156,7 @@ class TestConnectionManager(unittest.TestCase):
                 base_url='http://127.0.0.1:4010',
                 rate_limit_max_tokens=10,
                 rate_limit_token_regen_rate=10,
-                credentials=ModelFactory({'key': '', 'secret': ''})
+                credentials=Credential(key='', secret='')
             )
             # test 429 Rate Limit error
             with self.assertRaises(TreillageRateLimitException):
@@ -175,7 +175,7 @@ class TestConnectionManager(unittest.TestCase):
                 base_url='http://127.0.0.1:4010',
                 rate_limit_max_tokens=10,
                 rate_limit_token_regen_rate=10,
-                credentials=ModelFactory({'key': '', 'secret': ''})
+                credentials=Credential(key='', secret='')
             )
             response = MockResponse(204)
             self.assertEqual(
@@ -195,7 +195,7 @@ class TestConnectionManager(unittest.TestCase):
                 base_url='http://127.0.0.1:4010',
                 rate_limit_max_tokens=10,
                 rate_limit_token_regen_rate=10,
-                credentials=ModelFactory({'key': '', 'secret': ''})
+                credentials=Credential(key='', secret='')
             )
             response = MockResponse(200)
             with self.assertRaises(TreillageHTTPException):
@@ -212,7 +212,7 @@ class TestConnectionManager(unittest.TestCase):
         async def test():
             conn = await ConnectionManager.create(
                 base_url='http://127.0.0.1:4010',
-                credentials=ModelFactory({'key': '', 'secret': ''})
+                credentials=Credential(key='', secret='')
             )
             try:
                 await conn.get(endpoint='/')
@@ -251,7 +251,7 @@ class TestConnectionManager(unittest.TestCase):
         async def test():
             conn = await ConnectionManager.create(
                 base_url='http://127.0.0.1:4010',
-                credentials=ModelFactory({'key': '', 'secret': ''})
+                credentials=Credential(key='', secret='')
             )
             try:
                 await conn.patch(
@@ -277,7 +277,7 @@ class TestConnectionManager(unittest.TestCase):
         async def test():
             conn = await ConnectionManager.create(
                 base_url='http://127.0.0.1:4010',
-                credentials=ModelFactory({'key': '', 'secret': ''}))
+                credentials=Credential(key='', secret=''))
             try:
                 await conn.post(
                     endpoint='/post',
@@ -302,7 +302,7 @@ class TestConnectionManager(unittest.TestCase):
         async def test():
             conn = await ConnectionManager.create(
                 base_url='http://127.0.0.1:4010',
-                credentials=ModelFactory({'key': '', 'secret': ''})
+                credentials=Credential(key='', secret='')
             )
             try:
                 await conn.delete(endpoint='/delete')

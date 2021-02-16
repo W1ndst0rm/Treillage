@@ -1,6 +1,6 @@
 import unittest
 import os
-from treillage import get_credentials, TreillageException
+from treillage import Credential, TreillageException
 
 
 class TestCredentialImport(unittest.TestCase):
@@ -11,7 +11,7 @@ class TestCredentialImport(unittest.TestCase):
             for k in test_cred_data:
                 out.write(f"{k}: {test_cred_data[k]}\n")
         try:
-            credentials = get_credentials(creds_file)
+            credentials = Credential.get_credentials(creds_file)
             return credentials
         finally:
             os.remove(creds_file)
@@ -20,19 +20,15 @@ class TestCredentialImport(unittest.TestCase):
         creds_data = {
             'key': 'fvpk_00000000-0000-0000-0000-000000000000',
             'secret': 'fvsk_0000000000000000000000000000000000000000000000000',
-            'queueid': 'q12345678901'
 
         }
         credentials = self.get_credentials(creds_data)
         self.assertEqual(credentials.key, creds_data['key'])
         self.assertEqual(credentials.secret, creds_data['secret'])
-        self.assertEqual(credentials.queueid, creds_data['queueid'])
 
     def test_missing_key(self):
         creds_data = {
             'secret': 'fvsk_0000000000000000000000000000000000000000000000000',
-            'queueid': 'q12345678901'
-
         }
         with self.assertRaises(TreillageException):
             self.get_credentials(creds_data)
@@ -40,8 +36,6 @@ class TestCredentialImport(unittest.TestCase):
     def test_missing_secret(self):
         creds_data = {
             'key': 'fvpk_00000000-0000-0000-0000-000000000000',
-            'queueid': 'q12345678901'
-
         }
         with self.assertRaises(TreillageException):
             self.get_credentials(creds_data)

@@ -102,7 +102,7 @@ async def handle_document(
 async def patch_collection_item(fv, endpoint, json, log_data):
     try:
         # make the patch request
-        await fv.conn.patch(endpoint=endpoint, json=json)
+        await fv.conn.patch(endpoint=endpoint, body=json)
         # log the successful update
         with open("result.txt", "a") as out:
             out.write(f"200\t{log_data}\n")

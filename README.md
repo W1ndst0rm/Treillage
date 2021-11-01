@@ -83,21 +83,22 @@ async with Treillage(credentials_file="creds.yml") as tr:
 This will request the `personId` and `fullName` fields for the first 50 contacts with the first name of 'James'.
 
 POST and DELETE work similarly
+
 ```python
 from treillage import Treillage
 
 async with Treillage(credentials_file="creds.yml") as tr:
-    # POST Example
-    body = {
-        'firstName' : 'John',
-        'lastName' : 'Doe',
-        'fullName' : 'John Doe',
-        'gender': 'M',
-        'personTypes': ['Client'] 
-    }
-    response = await tr.conn.post(endpoint='/core/contacts', json=body)
-    # DELETE Example
-    await tr.conn.delete(endpoint='/core/documents/1234')
+  # POST Example
+  body = {
+    'firstName': 'John',
+    'lastName': 'Doe',
+    'fullName': 'John Doe',
+    'gender': 'M',
+    'personTypes': ['Client']
+  }
+  response = await tr.conn.post(endpoint='/core/contacts', body=body)
+  # DELETE Example
+  await tr.conn.delete(endpoint='/core/documents/1234')
 ```
 
 Base URL

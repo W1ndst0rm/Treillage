@@ -154,20 +154,20 @@ class ConnectionManager:
 
     @renew_access_token
     @rate_limit
-    async def patch(self, endpoint: str, json: dict, headers: dict = None):
+    async def patch(self, endpoint: str, body: dict, headers: dict = None):
         async with self.__session.patch(
                 url=self.__base_url + endpoint,
-                json=json,
+                body=body,
                 headers=self.__setup_headers(headers)
         ) as response:
             return await self.__handle_response(response, 200)
 
     @renew_access_token
     @rate_limit
-    async def post(self, endpoint: str, json: dict, headers: dict = None):
+    async def post(self, endpoint: str, body: dict, headers: dict = None):
         async with self.__session.post(
                 url=self.__base_url + endpoint,
-                json=json,
+                body=body,
                 headers=self.__setup_headers(headers)
         ) as response:
             return await self.__handle_response(response, 200)

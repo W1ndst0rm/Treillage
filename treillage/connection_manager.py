@@ -44,7 +44,6 @@ class ConnectionManager:
                  base_url: str,
                  credentials,
                  max_connections: int = None,
-                 rate_limit_max_tokens: int = None,
                  rate_limit_token_regen_rate: int = None
                  ):
         self.__base_url = base_url
@@ -57,10 +56,8 @@ class ConnectionManager:
             self.__connector = None
         self.__session = None
         self.__auth_tokens = None
-        if not (rate_limit_max_tokens is None or
-                rate_limit_token_regen_rate is None):
+        if rate_limit_token_regen_rate is not None:
             self.__rate_limiter = RateLimiter(
-                token_count=rate_limit_max_tokens,
                 token_rate=rate_limit_token_regen_rate
             )
         else:
@@ -71,7 +68,6 @@ class ConnectionManager:
                      base_url: str,
                      credentials,
                      max_connections: int = None,
-                     rate_limit_max_tokens: int = None,
                      rate_limit_token_regen_rate: int = None
                      ):
 
@@ -79,7 +75,6 @@ class ConnectionManager:
             base_url,
             credentials,
             max_connections,
-            rate_limit_max_tokens,
             rate_limit_token_regen_rate
         )
         self.__auth_tokens = await TokenManager.create(credentials, base_url)

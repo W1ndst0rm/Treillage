@@ -6,11 +6,10 @@ import time
 
 class RateLimiter:
     def __init__(self,
-                 token_count: int = 10,
-                 token_rate: int = 100,
+                 token_rate: int = 8,
                  max_backoff_time: int = 64):
-        self.__tokens = token_count
-        self.__MAX_TOKENS = token_count
+        self.__tokens = token_rate
+        self.__MAX_TOKENS = token_rate
         self.__token_rate = token_rate
         self.__last_update = time.monotonic()
         self.__max_backoff_time = max_backoff_time

@@ -70,8 +70,7 @@ class TestConnectionManager(unittest.TestCase):
             conn = await ConnectionManager.create(
                 base_url='http://127.0.0.1:4010',
                 credentials=Credential(key='', secret=''),
-                max_connections=20,
-                rate_limit_token_regen_rate=10
+                max_connections=20
             )
             self.assertIsInstance(conn.connector, aiohttp.TCPConnector)
             self.assertIsNone(conn.rate_limiter)
@@ -81,7 +80,6 @@ class TestConnectionManager(unittest.TestCase):
             conn = await ConnectionManager.create(
                 base_url='http://127.0.0.1:4010',
                 credentials=Credential(key='', secret=''),
-                rate_limit_max_tokens=25,
                 rate_limit_token_regen_rate=10
             )
             self.assertIsInstance(conn.rate_limiter, RateLimiter)
@@ -154,7 +152,6 @@ class TestConnectionManager(unittest.TestCase):
         async def test():
             conn = await ConnectionManager.create(
                 base_url='http://127.0.0.1:4010',
-                rate_limit_max_tokens=10,
                 rate_limit_token_regen_rate=10,
                 credentials=Credential(key='', secret='')
             )
@@ -173,7 +170,6 @@ class TestConnectionManager(unittest.TestCase):
         async def test():
             conn = await ConnectionManager.create(
                 base_url='http://127.0.0.1:4010',
-                rate_limit_max_tokens=10,
                 rate_limit_token_regen_rate=10,
                 credentials=Credential(key='', secret='')
             )
@@ -193,7 +189,6 @@ class TestConnectionManager(unittest.TestCase):
         async def test():
             conn = await ConnectionManager.create(
                 base_url='http://127.0.0.1:4010',
-                rate_limit_max_tokens=10,
                 rate_limit_token_regen_rate=10,
                 credentials=Credential(key='', secret='')
             )
@@ -256,13 +251,13 @@ class TestConnectionManager(unittest.TestCase):
             try:
                 await conn.patch(
                     endpoint='/patch',
-                    json={'firstName': 'John', 'lastName': 'Doe'}
+                    body={'firstName': 'John', 'lastName': 'Doe'}
                 )
             except TreillageHTTPException:
                 pass
             mock_session.return_value.patch.assert_called_with(
                 url='http://127.0.0.1:4010/patch',
-                json={'firstName': 'John', 'lastName': 'Doe'},
+                body={'firstName': 'John', 'lastName': 'Doe'},
                 headers={
                     'x-fv-sessionid': 'mock_refresh_token',
                     'Authorization': 'Bearer mock_access_token'
@@ -281,13 +276,13 @@ class TestConnectionManager(unittest.TestCase):
             try:
                 await conn.post(
                     endpoint='/post',
-                    json={'firstName': 'John', 'lastName': 'Doe'}
+                    body={'firstName': 'John', 'lastName': 'Doe'}
                 )
             except TreillageHTTPException:
                 pass
             mock_session.return_value.post.assert_called_with(
                 url='http://127.0.0.1:4010/post',
-                json={'firstName': 'John', 'lastName': 'Doe'},
+                body={'firstName': 'John', 'lastName': 'Doe'},
                 headers={
                     'x-fv-sessionid': 'mock_refresh_token',
                     'Authorization': 'Bearer mock_access_token'

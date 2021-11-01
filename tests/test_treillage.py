@@ -21,7 +21,6 @@ class TestTreillage(unittest.TestCase):
                     BaseURL.UNITED_STATES.value,
                     tr._Treillage__credential,
                     None,
-                    None,
                     None
                 )
 
@@ -33,7 +32,6 @@ class TestTreillage(unittest.TestCase):
                 credentials_file='creds.yml',
                 base_url=BaseURL.UNITED_STATES,
                 max_connections=10,
-                rate_limit_max_tokens=20,
                 rate_limit_token_regen_rate=30
             )
             self.assertIsNotNone(tr.conn)
@@ -44,7 +42,6 @@ class TestTreillage(unittest.TestCase):
                 BaseURL.UNITED_STATES.value,
                 tr._Treillage__credential,
                 10,
-                20,
                 30
             )
             await tr.close()
@@ -66,7 +63,6 @@ class TestTreillage(unittest.TestCase):
                 mock_connection_manager.create.assert_called_once_with(
                     "https://api.filevine.io",
                     tr._Treillage__credential,
-                    None,
                     None,
                     None
                 )
@@ -90,7 +86,6 @@ class TestTreillage(unittest.TestCase):
                     BaseURL.UNITED_STATES.value,
                     tr._Treillage__credential,
                     10,
-                    None,
                     None
                 )
 
@@ -103,8 +98,7 @@ class TestTreillage(unittest.TestCase):
             async with Treillage(
                     credentials_file='creds.yml',
                     base_url=BaseURL.UNITED_STATES,
-                    rate_limit_token_regen_rate=20,
-                    rate_limit_max_tokens=25
+                    rate_limit_token_regen_rate=20
             ) as tr:
                 self.assertIsNotNone(tr.conn)
                 mock_credential.get_credentials.assert_called_once_with(
@@ -114,7 +108,6 @@ class TestTreillage(unittest.TestCase):
                     BaseURL.UNITED_STATES.value,
                     tr._Treillage__credential,
                     None,
-                    25,
                     20
                 )
 
@@ -128,8 +121,7 @@ class TestTreillage(unittest.TestCase):
                     credentials_file='creds.yml',
                     base_url=BaseURL.UNITED_STATES,
                     max_connections=10,
-                    rate_limit_token_regen_rate=20,
-                    rate_limit_max_tokens=25
+                    rate_limit_token_regen_rate=20
             ) as tr:
                 self.assertIsNotNone(tr.conn)
                 mock_credential.get_credentials.assert_called_once_with(
@@ -139,7 +131,6 @@ class TestTreillage(unittest.TestCase):
                     BaseURL.UNITED_STATES.value,
                     tr._Treillage__credential,
                     10,
-                    25,
                     20
                 )
 

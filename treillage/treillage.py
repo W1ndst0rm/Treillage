@@ -16,9 +16,7 @@ class Treillage:
                  # Number of parallel connections to each host:port endpoint
                  max_connections: int = None,
                  # Number of tokens added per second to the rate limit pool
-                 rate_limit_token_regen_rate: int = None,
-                 # Max number of tokens in the rate limit pool
-                 rate_limit_max_tokens: int = None):
+                 rate_limit_token_regen_rate: int = None):
         self.__credential = Credential.get_credentials(credentials_file)
         if isinstance(base_url, BaseURL):
             self.__base_url = base_url.value
@@ -26,7 +24,6 @@ class Treillage:
             self.__base_url = base_url
         self.__max_connections = max_connections
         self.__rate_limit_token_regen_rate = rate_limit_token_regen_rate
-        self.__rate_limit_max_tokens = rate_limit_max_tokens
         self.__conn = None
 
     @property
@@ -38,7 +35,6 @@ class Treillage:
             self.__base_url,
             self.__credential,
             self.__max_connections,
-            self.__rate_limit_max_tokens,
             self.__rate_limit_token_regen_rate
         )
 
@@ -49,13 +45,11 @@ class Treillage:
             base_url: Union[str, BaseURL] = BaseURL.UNITED_STATES.value,
             max_connections: int = None,
             rate_limit_token_regen_rate: int = None,
-            rate_limit_max_tokens: int = None
     ):
         self = Treillage(credentials_file,
                          base_url,
                          max_connections,
-                         rate_limit_token_regen_rate,
-                         rate_limit_max_tokens)
+                         rate_limit_token_regen_rate)
         await self.__async_init()
         return self
 

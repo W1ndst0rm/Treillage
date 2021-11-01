@@ -15,15 +15,15 @@ class Treillage:
                  base_url: Union[str, BaseURL] = BaseURL.UNITED_STATES.value,
                  # Number of parallel connections to each host:port endpoint
                  max_connections: int = None,
-                 # Number of tokens added per second to the rate limit pool
-                 rate_limit_token_regen_rate: int = None):
+                 # Maximum requests per second allowed by the rate-limiter
+                 requests_per_second: int = None):
         self.__credential = Credential.get_credentials(credentials_file)
         if isinstance(base_url, BaseURL):
             self.__base_url = base_url.value
         elif isinstance(base_url, str):
             self.__base_url = base_url
         self.__max_connections = max_connections
-        self.__rate_limit_token_regen_rate = rate_limit_token_regen_rate
+        self.__rate_limit_token_regen_rate = requests_per_second
         self.__conn = None
 
     @property

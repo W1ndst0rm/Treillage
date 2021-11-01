@@ -27,14 +27,13 @@ async def main():
         # Create the treillage context manager
         async with Treillage(
                 credentials_file,
-                rate_limit_max_tokens=8,
-                rate_limit_token_regen_rate=8
-        ) as fv:
+                requests_per_second=8
+        ) as tr:
             # Iterate over every row in the spreadsheet
             for idx, row in batch.iterrows():
                 # Process the data from the row
                 await handle_document(
-                    fv=fv,
+                    tr=tr,
                     projectid=row["__ProjectID"],
                     sectionselector=row["SectionSelector"],
                     collectionid=row["__CollectionItemGuid"],
@@ -46,7 +45,7 @@ async def main():
 
 
 async def handle_document(
-        fv,
+        tr,
         projectid,
         sectionselector,
         collectionid,
@@ -62,7 +61,7 @@ async def handle_document(
     # Use a try-except block to handle errors
     try:
         # get fieldselector info about the requested collection
-        resp = await fv.conn.get(
+        resp = await tr.conn.get(
             endpoint=endpoint,
             params={'requestedFields': fieldselector}
         )
@@ -81,12 +80,12 @@ async def handle_document(
         # Update formatted log data with new values
         log_data = log_data + "\t" + str(newdocids)
         # Patch the collection item with the additional docIDs
-        await patch_collection_item(fv, endpoint, newdocids, log_data)
+        await patch_collection_item(tr, endpoint, newdocids, log_data)
 
     # Retry if the GET request was rate-limited
     except TreillageRateLimitException:
         await handle_document(
-            fv,
+            tr,
             projectid,
             sectionselector,
             collectionid,

@@ -23,17 +23,17 @@ Table of contents
 =================
 
 <!--ts-->
-* [Installation](#library-instalation)
+* [Installation](#library-installation)
 * [Getting Started](#getting-started)
     * [Using built-in endpoints](#using-built-in-endpoints)
     * [Using raw HTTP methods](#using-raw-http-methods)
     * [Base URL](#base-url)
 * [Rate Limiting and Connection Management](#Rate-Limiting-and-Connection-Management)
 * [Exceptions](#exceptions)
-    * [TreillageHTTPException](#FilevineHTTPException)
-    * [TreillageRateLimitException](#FilevineRateLimitException)
-    * [TreillageTypeError](#FilevineTypeError)
-    * [TreillageValueError](#FilevineValueError)
+    * [TreillageHTTPException](#treillagehttpexception)
+    * [TreillageRateLimitException](#treillageratelimitexception)
+    * [TreillageTypeError](#treillagetypeerror)
+    * [TreillageValueError](#treillagevalueerror)
 * [Examples](#examples)
 <!--te-->
 ## Library Installation
@@ -123,11 +123,11 @@ from exceeding the rate-limit. To keep things simple, the maximum number of toke
 in one second.
 
 To use the built-in rate limiter, one additional parameters must be passed to the treillage object:
-* `rate_limit_token_regen_rate` sets how many tokens are regenerated per second.
+* `requests_per_second` sets how many tokens are regenerated per second.
 
-If either one of the parameters is not set, no rate-limiting will occur.
+If this parameter is not set, no rate-limiting will occur.
 ```python
-async with Treillage(credentials_file="creds.yml", rate_limit_token_regen_rate=10) as tr:
+async with Treillage(credentials_file="creds.yml", requests_per_second=10) as tr:
     tr.do_something()
 ```
 Additionally, the rate limiter will use an exponential backoff algorithm to

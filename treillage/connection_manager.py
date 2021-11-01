@@ -28,6 +28,17 @@ def rate_limit(func):
     return wrapped
 
 
+def retry_on_rate_limit(func):
+    @functools.wraps(func)
+    async def wrapped(self, *args, **kwargs):
+        while True:
+            try:
+                return func(self, *args, **kwargs)
+            except TreillageRateLimitException:
+                pass
+    return wrapped
+
+
 class ConnectionManager:
     def __init__(self,
                  base_url: str,

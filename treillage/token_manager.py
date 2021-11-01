@@ -99,7 +99,9 @@ class TokenManager:
     def __set_tokens(self, tokens: dict):
         self.__access_token = tokens["accessToken"]
         self.__access_token_expiry = jwt.decode(tokens['accessToken'],
-                                                verify=False)['exp']
+                                                algorithms=["RS256"],
+                                                options={"verify_signature": False}
+                                                )['exp']
         self.__refresh_token = tokens["refreshToken"]
         self.__refresh_token_expiry = tokens["refreshTokenExpiry"]
         self.__refresh_token_ttl = tokens["refreshTokenTtl"]

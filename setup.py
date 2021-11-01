@@ -20,7 +20,8 @@ setup(
         'aiohttp>=3,<4',
         'pandas>=1,<2',
         'PyYAML>=5,<6',
-        'PyJWT>=1.6.4,<2'
+        'PyJWT>=1.6.4,<2',
+        'cryptography>=35,<36'
     ],
     classifiers=[
         "Programming Language :: Python :: 3.8",

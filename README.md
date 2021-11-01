@@ -119,15 +119,15 @@ Rate Limiting and Connection Management
 ======================================= 
 The built-in rate limiter uses a token bucket technique. Each  web request consumes a token,
 and tokens regenerate at a set rate. The bucket has a fixed capacity to keep the initial burst of requests
-from exceeding the rate-limit.
+from exceeding the rate-limit. To keep things simple, the maximum number of tokens is equal to the amount regenerated
+in one second.
 
-To use the built-in rate limiter, two parameters must be passed to the filevine object:
-* `rate_limit_max_tokens` sets the capacity of the token bucket
+To use the built-in rate limiter, one additional parameters must be passed to the treillage object:
 * `rate_limit_token_regen_rate` sets how many tokens are regenerated per second.
 
 If either one of the parameters is not set, no rate-limiting will occur.
 ```python
-async with Treillage(credentials_file="creds.yml", rate_limit_max_tokens=10, rate_limit_token_regen_rate=10) as tr:
+async with Treillage(credentials_file="creds.yml", rate_limit_token_regen_rate=10) as tr:
     tr.do_something()
 ```
 Additionally, the rate limiter will use an exponential backoff algorithm to

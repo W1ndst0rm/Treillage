@@ -98,16 +98,16 @@ async def handle_document(
             out.write(f"{e.code}\t{log_data}\t{''}\t{e.msg}\tFailed to Get\n")
 
 
-async def patch_collection_item(fv, endpoint, json, log_data):
+async def patch_collection_item(tr, endpoint, json, log_data):
     try:
         # make the patch request
-        await fv.conn.patch(endpoint=endpoint, body=json)
+        await tr.conn.patch(endpoint=endpoint, body=json)
         # log the successful update
         with open("result.txt", "a") as out:
             out.write(f"200\t{log_data}\n")
     # Retry if the PATCH request was rate-limited
     except TreillageRateLimitException:
-        await patch_collection_item(fv, endpoint, json, log_data)
+        await patch_collection_item(tr, endpoint, json, log_data)
     # Log all other failed PATCH requests
     except TreillageHTTPException as e:
         with open("error.txt", "a") as out:

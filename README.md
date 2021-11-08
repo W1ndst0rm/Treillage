@@ -136,6 +136,16 @@ temporarily slow down requests when the server returns a HTTP 429 error (Rate Li
 Alternatively the total number of simultaneous connections to the server can limited by passing
 the `max_connections` parameter. If `max_connections` is not set, the default value of `100` will be used.
 
+If you want to automatically retry a rate limited call, use the `@retry_on_rate_limit` decorator to wrap the function
+you want to be retried.
+```python
+@retry_on_rate_limit
+async def get_some_data(tr: Treillage, endpoint):
+    return await tr.conn.get(endpoint)
+
+some_data = await get_some_data(tr, '/some_data')
+```
+
 Exceptions
 ==========
 The treillage module includes several exceptions to make error handling easier.

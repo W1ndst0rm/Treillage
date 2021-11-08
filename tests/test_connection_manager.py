@@ -5,7 +5,7 @@ import unittest
 from unittest.mock import patch
 from treillage import (ConnectionManager, RateLimiter, TokenManager,
                        Credential, TreillageHTTPException,
-                       TreillageRateLimitException)
+                       TreillageRateLimitException, retry_on_rate_limit)
 
 
 class MockTokenManager(TokenManager):
@@ -52,6 +52,33 @@ class MockResponse:
 
     async def text(self):
         return None
+
+
+class TestRetryOnRateLimit(unittest.TestCase):
+    @patch('treillage.connection_manager.TokenManager', MockTokenManager)
+    def test_retry(self):
+        @retry_on_rate_limit
+        async def get_response(j, cm: ConnectionManager):
+            response_codes = [429, 429, 429, 200, 429]
+            j['index'] += 1
+            response = MockResponse(response_codes[j['index']])
+            return await cm._ConnectionManager__handle_response(response, 200)
+
+        async def test():
+            conn = await ConnectionManager.create(
+                base_url='http://127.0.0.1:4010',
+                credentials=Credential(key='', secret='')
+            )
+            i = {'index': -1}
+            try:
+                resp = await get_response(i, conn)
+            except TreillageRateLimitException as ex:
+                assert False
+            self.assertEqual(i['index'], 3)
+            self.assertEqual(resp, {'items': []})
+            await conn.close()
+
+        asyncio.run(test())
 
 
 class TestConnectionManager(unittest.TestCase):

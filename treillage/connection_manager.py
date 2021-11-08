@@ -33,7 +33,7 @@ def retry_on_rate_limit(func):
     async def wrapped(self, *args, **kwargs):
         while True:
             try:
-                return func(self, *args, **kwargs)
+                return await func(self, *args, **kwargs)
             except TreillageRateLimitException:
                 pass
     return wrapped

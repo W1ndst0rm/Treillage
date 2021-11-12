@@ -30,10 +30,10 @@ def rate_limit(func):
 
 def retry_on_rate_limit(func):
     @functools.wraps(func)
-    async def wrapped(self, *args, **kwargs):
+    async def wrapped(*args, **kwargs):
         while True:
             try:
-                return await func(self, *args, **kwargs)
+                return await func(*args, **kwargs)
             except TreillageRateLimitException:
                 pass
     return wrapped
@@ -152,7 +152,7 @@ class ConnectionManager:
     async def patch(self, endpoint: str, body: dict, headers: dict = None):
         async with self.__session.patch(
                 url=self.__base_url + endpoint,
-                body=body,
+                json=body,
                 headers=self.__setup_headers(headers)
         ) as response:
             return await self.__handle_response(response, 200)
@@ -162,7 +162,7 @@ class ConnectionManager:
     async def post(self, endpoint: str, body: dict, headers: dict = None):
         async with self.__session.post(
                 url=self.__base_url + endpoint,
-                body=body,
+                json=body,
                 headers=self.__setup_headers(headers)
         ) as response:
             return await self.__handle_response(response, 200)

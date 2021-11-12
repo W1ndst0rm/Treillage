@@ -284,7 +284,7 @@ class TestConnectionManager(unittest.TestCase):
                 pass
             mock_session.return_value.patch.assert_called_with(
                 url='http://127.0.0.1:4010/patch',
-                body={'firstName': 'John', 'lastName': 'Doe'},
+                json={'firstName': 'John', 'lastName': 'Doe'},
                 headers={
                     'x-fv-sessionid': 'mock_refresh_token',
                     'Authorization': 'Bearer mock_access_token'
@@ -309,7 +309,7 @@ class TestConnectionManager(unittest.TestCase):
                 pass
             mock_session.return_value.post.assert_called_with(
                 url='http://127.0.0.1:4010/post',
-                body={'firstName': 'John', 'lastName': 'Doe'},
+                json={'firstName': 'John', 'lastName': 'Doe'},
                 headers={
                     'x-fv-sessionid': 'mock_refresh_token',
                     'Authorization': 'Bearer mock_access_token'

@@ -10,7 +10,7 @@ Unofficial Wrapper library for the Filevine API
 Treillage is an unofficial wrapper library for the Filevine API written in python.
 This library is neither supported by or maintained by Filevine, Inc.
 
-[Filevine's API Documentation](https://developer.filevine.io/v2/overview)
+[Filevine's API Documentation](https://developer.filevine.io/docs/v2/ZG9jOjMxNTA3OTQ0-welcome)
 
 Key Features
 ============

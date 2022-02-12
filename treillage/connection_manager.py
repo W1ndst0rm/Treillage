@@ -169,6 +169,16 @@ class ConnectionManager:
 
     @renew_access_token
     @rate_limit
+    async def put(self, endpoint: str, body: dict, headers: dict = None):
+        async with self.__session.put(
+                url=self.__base_url + endpoint,
+                json=body,
+                headers=self.__setup_headers(headers)
+        ) as response:
+            return await self.__handle_response(response, 200)
+            
+    @renew_access_token
+    @rate_limit
     async def delete(self, endpoint: str, headers: dict = None):
         async with self.__session.delete(
                 url=self.__base_url + endpoint,

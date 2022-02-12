@@ -318,7 +318,7 @@ class TestConnectionManager(unittest.TestCase):
             await conn.close()
         asyncio.run(test())
         
-     @patch('treillage.connection_manager.TokenManager', MockTokenManager)
+    @patch('treillage.connection_manager.TokenManager', MockTokenManager)
     @patch('aiohttp.ClientSession', autospec=True)
     def test_put_request(self, mock_session):
         async def test():

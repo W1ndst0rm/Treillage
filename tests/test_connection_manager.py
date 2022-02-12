@@ -317,6 +317,31 @@ class TestConnectionManager(unittest.TestCase):
             )
             await conn.close()
         asyncio.run(test())
+        
+    @patch('treillage.connection_manager.TokenManager', MockTokenManager)
+    @patch('aiohttp.ClientSession', autospec=True)
+    def test_put_request(self, mock_session):
+        async def test():
+            conn = await ConnectionManager.create(
+                base_url='http://127.0.0.1:4010',
+                credentials=Credential(key='', secret=''))
+            try:
+                await conn.put(
+                    endpoint='/put',
+                    body={'firstName': 'John', 'lastName': 'Doe'}
+                )
+            except TreillageHTTPException:
+                pass
+            mock_session.return_value.put.assert_called_with(
+                url='http://127.0.0.1:4010/put',
+                json={'firstName': 'John', 'lastName': 'Doe'},
+                headers={
+                    'x-fv-sessionid': 'mock_refresh_token',
+                    'Authorization': 'Bearer mock_access_token'
+                }
+            )
+            await conn.close()
+        asyncio.run(test()) 
 
     @patch('treillage.connection_manager.TokenManager', MockTokenManager)
     @patch('aiohttp.ClientSession', autospec=True)

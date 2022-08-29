@@ -32,7 +32,7 @@ class TestTreillage(unittest.TestCase):
                 credentials_file='creds.yml',
                 base_url=BaseURL.UNITED_STATES,
                 max_connections=10,
-                rate_limit_token_regen_rate=30
+                requests_per_second=30
             )
             self.assertIsNotNone(tr.conn)
             mock_credential.get_credentials.assert_called_once_with(

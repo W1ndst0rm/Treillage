@@ -23,7 +23,7 @@ class Treillage:
         elif isinstance(base_url, str):
             self.__base_url = base_url
         self.__max_connections = max_connections
-        self.__rate_limit_token_regen_rate = requests_per_second
+        self.__requests_per_second = requests_per_second
         self.__conn = None
 
     @property
@@ -35,7 +35,7 @@ class Treillage:
             self.__base_url,
             self.__credential,
             self.__max_connections,
-            self.__rate_limit_token_regen_rate
+            self.__requests_per_second
         )
 
     @classmethod
@@ -44,12 +44,12 @@ class Treillage:
             credentials_file: str,
             base_url: Union[str, BaseURL] = BaseURL.UNITED_STATES.value,
             max_connections: int = None,
-            rate_limit_token_regen_rate: int = None,
+            requests_per_second: int = None,
     ):
         self = Treillage(credentials_file,
                          base_url,
                          max_connections,
-                         rate_limit_token_regen_rate)
+                         requests_per_second)
         await self.__async_init()
         return self
 

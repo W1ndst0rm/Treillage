@@ -37,3 +37,11 @@ class TreillageValueError(TreillageException, ValueError):
         if not msg:
             msg = "Given parameter does not meet argument requirements"
         super(TreillageValueError, self).__init__(msg=msg)
+
+class TreillageValidationError(TreillageException):
+    def __init__(self, msg=None):
+        if not msg:
+            msg = "Given parameter does not meet argument requirements"
+        super(TreillageValidationError, self).__init__(msg=msg)
+
+

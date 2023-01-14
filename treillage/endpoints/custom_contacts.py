@@ -1,13 +1,17 @@
 
 from typing import List, Dict
 from .. import ConnectionManager
-from .. import TreillageValueError
+from .. import TreillageValidationError
 from .list_paginator import list_paginator
 
 
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 #                             Custom Contacts
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+# TODO
+# 3. Person Types
+# 4. Hashtags
+# 5. Custom Fields
 
 async def get_contact_metadata(
         connection: ConnectionManager,
@@ -18,8 +22,7 @@ async def get_contact_metadata(
     if fields:
         requested_fields = ','.join(*[fields])
         params['requestedFields'] = requested_fields
-    sessionMetadata = await connection.get(endpoint, params)
-    return sessionMetadata
+    return await connection.get(endpoint, params)
 
 
 async def create_custom_contact(
@@ -39,11 +42,16 @@ async def create_custom_contact(
     birthdate: str = None,
     deathdate: str = None,
     addresses: List[dict] = None,
-    metadata: List[dict] = None,
-    **kwargs
+    phones: List[dict] = None,
+    emails: List[dict] = None,
+    personTypes: List[str] = None,
+    metadata: List[dict] = None, #can I cache this instead of passing as arg?
+    #**kwargs, to add later for custom fields
 ):
 
     arguments = locals().copy()
+    endpoint = f'/core/custom-contacts/'
+
     body = list()
 
     def addAction(key, action, value):
@@ -52,9 +60,68 @@ async def create_custom_contact(
             "action": action,
             "value": value
         })
-    endpoint = f'/core/custom-contacts/'
+    
+
     standardStringFields = 'firstName middleName lastName nickname prefix suffix fromCompany jobTitle department birthdate deathdate'.split()
     standardBoolFields = 'isSingleName isArchived isDeceased'.split()
+    addressFields = "line1 line2 city state zip notes addressLabelID addressLabel".split()
+    phoneFields = "number notes phoneLabel phoneLabelID".split()
+    emailFields = "address notes emailLabel".split()
+
+    def processAddressEmailPhone(key, value, labels):
+        if not isinstance(value, List):
+            raise TreillageValidationError(
+                f"{key} must be a list."
+            )
+
+        for item in value:
+
+            if not isinstance(item, Dict):
+                raise TreillageValidationError(
+                    f"'{key}' must be a list of dictionaries"
+                )
+
+            if not set(item.keys()).issubset(labels):
+                raise TreillageValidationError(
+                    f"{key} includes invalid fields:" +
+                    f"{item.keys()}"
+                )
+
+            if item.get('state'):
+                if len(item['state']) > 2:
+                    raise TreillageValidationError(
+                        f"State field cannot be > 2 characters: " +
+                        item['state']
+                    )
+
+            if metadata:
+                if key == 'addresses':
+                    mode = 'address'
+                if key == 'phones':
+                    mode = 'phone'
+                if key == 'emails':
+                    mode = 'email'
+
+                labelAllowedValues = next(item for item in metadata if item["selector"] == key)['allowedValues']
+
+                if item.get(f'{mode}LabelID'):
+                    if not item[f'{mode}LabelID'] in [x[f'{mode}]LabelID'] for x in labelAllowedValues]:
+                        raise TreillageValidationError(
+                            f"{mode}LabelID is not valid: {item[f'{mode}LabelID']}"
+                        )
+
+                if item.get(f'{mode}Label'):
+                    if item[f'{mode}Label'] in [x['name'] for x in labelAllowedValues]:
+                        item[f'{mode}LabelID'] = next(
+                            x for x in labelAllowedValues if x['name'] == item[f'{mode}Label'])[f'{mode}LabelID']
+                        del item[f'{mode}Label']
+                    else:
+                        invalidLabel = item[f'{mode}Label']
+                        raise TreillageValidationError(
+                            f"{mode} value is not valid: {invalidLabel}")
+                    
+            
+            addAction(key, 'ADD', item)
 
     for key, value in arguments.items():
 
@@ -65,72 +132,37 @@ async def create_custom_contact(
             if isinstance(value, bool):
                 addAction(key, 'UPDATE', value)
             else:
-                raise TreillageValueError(
+                raise TreillageValidationError(
                     f"{key}: {value} is not a bool"
                 )
 
         if key == 'addresses' and value:
+            processAddressEmailPhone(key, value, addressFields)
 
-            if not isinstance(value, List):
-                raise TreillageValueError(
-                    f"{key} must be a list."
-                )
-            addressFields = "line1 line2 city state zip notes addressLabelID addressLabel".split()
-            for address in value:
+        if key == 'phones' and value:
+            processAddressEmailPhone(key, value, phoneFields)
 
-                if not isinstance(address, Dict):
-                    raise TreillageValueError(
-                        f"'addresses' must be a list of dictionaries"
-                    )
-
-                if not set(address.keys()).issubset(addressFields):
-                    raise TreillageValueError(
-                        f"Address includes invalid fields:" +
-                        f"{address.keys()}"
-                    )
-
-                if address.get('state'):
-                    if len(address['state']) > 2:
-                        raise TreillageValueError(
-                            f"State field cannot be > 2 characters: " +
-                            address['state']
+        if key == 'emails' and value:
+            processAddressEmailPhone(key, value, emailFields)
+        
+        if metadata:
+            if key == 'personTypes' and value:
+                personTypes = value.split(', ')
+                allowedTypes = next(item for item in metadata if item["selector"] == key)['allowedValues']
+                for personType in personTypes:
+                    try:
+                        id = next(x for x in allowedTypes if x['name'] == personType)['value']
+                    except:
+                        raise TreillageValidationError(
+                            f"Invalid personType: {personType}"
                         )
+                    addAction(key, 'ADD', id)
 
-                if metadata:
-                    addressLabelAllowedValues = next(
-                        item for item in metadata if item["selector"] == "addresses")['allowedValues']
 
-                    if address.get('addressLabelID'):
-                        if not address['addressLabelID'] in [x['addressLabelID'] for x in addressLabelAllowedValues]:
-                            raise TreillageValueError(
-                                f"addressLabelID is not valid: {address['addressLabelID']}"
-                            )
 
-                    if address.get('addressLabel'):
-                        if address['addressLabel'] in [x['name'] for x in addressLabelAllowedValues]:
-                            address['addressLabelID'] = next(
-                                item for item in addressLabelAllowedValues if item['name'] == address['addressLabel'])['addressLabelID']
-                            del address['addressLabel']
-                        else:
-                            raise TreillageValueError(
-                                f"Address label is not valid: {address['addressLabel']}"
-                            )
-                # if 'addressLabelId' in address.keys():
-                    # if address['addressLabelId'] in
-
-                # if metadata and 'addressLabelID' in address.keys() and address['addressLabelID'] in metadata['']:
-
-                addAction('addresses', 'ADD', address)
-
-        # todo: add support for custom fields
-        if key.startswith('custom.') and value:
-            print("wow, a custom key!")
-
-    return await connection.post(endpoint, body)
-
-""""
-body = [{
-    'selector': 'firstName',
-    'action': 'UPDATE', 'value': 'Mank'}, {'selector': 'middleName', 'action': 'UPDATE', 'value': 'P'}, {'selector': 'lastName', 'action': 'UPDATE', 'value': 'Morkem'}, {'selector': 'nickname', 'action': 'UPDATE', 'value': '#9'}, {'selector': 'prefix', 'action': 'UPDATE', 'value': 'Mr'}, {'selector': 'suffix', 'action': 'UPDATE', 'value': 'Esquire'}, {'selector': 'fromCompany', 'action': 'UPDATE', 'value': 'Vineskills'}, {'selector': 'jobTitle', 'action': 'UPDATE', 'value': 'Optimizer'}, {'selector': 'department', 'action': 'UPDATE', 'value': 'Optimization and Data Management'}, {'selector': 'isDeceased', 'action': 'UPDATE', 'value': True}, {'selector': 'birthdate', 'action': 'UPDATE', 'value': '11/11/1911'}, {'selector': 'deathdate', 'action': 'UPDATE', 'value': '11/11/2019'}, {'selector': 'addresses', 'action': 'ADD', 'value': {'line1': '131 Cool Street', 'line2': 'Apt. 20', 'city': 'Chicago', 'state': 'IL', 'zip': 60623, 'notes': 'The place to Be', 'addressLabelID': 990001441}}, {'selector': 'addresses', 'action': 'ADD', 'value': {'line1': '139 Cool Street', 'line2': 'Apt. 28', 'city': 'Chicago', 'state': 'IL', 'zip': 60631, 'notes': 'The place to Be', 'addressLabelID': 990001442}}]
-create_custom_contact(**body)
-"""
+            # todo: add support for custom fields
+            if key.startswith('custom.') and value:
+                print("wow, a custom key!")
+    
+    print('posting')
+    #return await connection.post(endpoint, body)

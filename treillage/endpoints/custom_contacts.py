@@ -8,9 +8,6 @@ import json
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 #                             Custom Contacts
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-# TODO
-# 4. Hashtags
-# 5. Custom Fields
 
 
 async def get_contact_metadata(connection: ConnectionManager, fields: List[str] = None):
@@ -42,7 +39,7 @@ async def create_custom_contact(
     phones: List[dict] = None,
     emails: List[dict] = None,
     personTypes: List[str] = None,
-    metadata: List[dict] = None,  # can I cache this instead of passing as arg?
+    metadata: List[dict] = None,  # can this be cached instead of passing as arg?
     **kwargs,
 ):
 
@@ -59,12 +56,12 @@ async def create_custom_contact(
     standardStringFields = "firstName middleName lastName nickname prefix suffix fromCompany jobTitle department birthdate deathdate".split()
     standardBoolFields = "isSingleName isArchived isDeceased".split()
     addressFields = (
-        "line1 line2 city state zip notes addressLabelID addressLabel".split()
+        "line1 line2 city state zip notes addressLabel addressLabelID".split()
     )
     phoneFields = "number notes phoneLabel phoneLabelID".split()
-    emailFields = "address notes emailLabel".split()
+    emailFields = "address notes emailLabel emailLabelId".split()
 
-    def processAddressEmailPhone(key, value, labels):
+    def processAddressEmailPhone(key, value, fields):
         if not isinstance(value, List):
             raise TreillageValidationError(f"{key} must be a list.")
 
@@ -75,7 +72,7 @@ async def create_custom_contact(
                     f"'{key}' must be a list of dictionaries"
                 )
 
-            if not set(item.keys()).issubset(labels):
+            if not set(item.keys()).issubset(fields):
                 raise TreillageValidationError(
                     f"{key} includes invalid fields:" + f"{item.keys()}"
                 )
@@ -98,6 +95,7 @@ async def create_custom_contact(
                     item for item in metadata if item["selector"] == key
                 )["allowedValues"]
 
+                # validate LabelID
                 if item.get(f"{mode}LabelID"):
                     if not item[f"{mode}LabelID"] in [
                         x[f"{mode}]LabelID"] for x in labelAllowedValues
@@ -105,7 +103,7 @@ async def create_custom_contact(
                         raise TreillageValidationError(
                             f"{mode}LabelID is not valid: {item[f'{mode}LabelID']}"
                         )
-
+                # Replace label with labelID
                 if item.get(f"{mode}Label"):
                     if item[f"{mode}Label"] in [x["name"] for x in labelAllowedValues]:
                         item[f"{mode}LabelID"] = next(
@@ -119,19 +117,28 @@ async def create_custom_contact(
                         raise TreillageValidationError(
                             f"{mode} label is not valid: {invalidLabel}"
                         )
-
+            # if address/phone/email passed validation, add it to the body
             addAction(key, "ADD", item)
 
+    # Begin processing arguments:
     for key, value in arguments.items():
 
         if key in standardStringFields and value:
             addAction(key, "UPDATE", value)
 
-        if key in standardBoolFields and value:
+        if key in standardBoolFields:
             if isinstance(value, bool):
                 addAction(key, "UPDATE", value)
             else:
                 raise TreillageValidationError(f"{key}: {value} is not a bool")
+
+        if key == "hashtags" and value:
+            try:
+                tags = value.split(", ")
+                for tag in tags:
+                    addAction("hashtags", "ADD", tag)
+            except:
+                raise TreillageValidationError(f"Invalid hashtags: {value}")
 
         if key == "addresses" and value:
             processAddressEmailPhone(key, value, addressFields)
@@ -159,18 +166,24 @@ async def create_custom_contact(
                         )
                     addAction(key, "ADD", id)
 
-            if key.startswith("custom.") and value:
-                field = next(x for x in metadata if x["selector"] == key)
-                action = field["action"].split("|")[
-                    0
-                ]  # "UPDATE|REMOVE" (are all custom fields "UPDATE"?)
-                if field.get("allowedValues"):
-                    allowedValues = field["allowedValues"]
-                    if value not in allowedValues:
-                        raise TreillageValidationError(
-                            f"{value} is an invalid value for {key}. Allowed values are {allowedValues}"
-                        )
-                addAction(key, action, value)
+            if key.startswith("custom."):
+                try:
+                    field = next(x for x in metadata if x["selector"] == key)
+                    action = next(
+                        iter(
+                            field["action"].split("|")
+                        )  # "action": "UPDATE|REMOVE" / "actions": "ADD|REMOVE"
+                    )
+                    if field.get("allowedValues"):
+                        allowedValues = field["allowedValues"]
+                        if value not in allowedValues:
+                            raise TreillageValidationError(
+                                f"{value} is an invalid value for {key}. Allowed values are {allowedValues}"
+                            )
+                    addAction(key, action, value)
+                except:
+                    raise TreillageValidationError(
+                        f"Invalid custom field: {key}={value}"
+                    )
 
-    print(json.dumps(body))
-    # return await connection.post(endpoint, body)
+    return await connection.post(endpoint, body)

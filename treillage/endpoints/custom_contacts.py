@@ -166,7 +166,7 @@ async def create_custom_contact(
                         )
                     addAction(key, "ADD", id)
 
-            if key.startswith("custom."):
+            if key.startswith("custom.") and value is not None:
                 try:
                     field = next(x for x in metadata if x["selector"] == key)
                     action = next(

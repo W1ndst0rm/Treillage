@@ -1,5 +1,5 @@
 from .. import ConnectionManager
-from typing import AsyncGenerator, List
+from typing import AsyncGenerator, Coroutine, List
 from .list_paginator import list_paginator
 
 # Make sure to add this decorator before the get_item/get_item_list decorator

@@ -1,6 +1,7 @@
 from .. import ConnectionManager
 from typing import AsyncGenerator, Coroutine, List
 from .list_paginator import list_paginator
+import json
 
 # Make sure to add this decorator before the get_item/get_item_list decorator
 def requested_fields(func):
@@ -17,7 +18,7 @@ def requested_fields(func):
 def get_item(func):
     async def wrapper(connection: ConnectionManager, *args, **kwargs) -> dict:
         params = kwargs.setdefault("params", dict())
-        endpoint = func(connection, *args)
+        endpoint = await func(connection, *args)
         return await connection.get(endpoint, params)
 
     return wrapper
@@ -26,8 +27,17 @@ def get_item(func):
 def get_item_list(func):
     async def wrapper(connection: ConnectionManager, *args, **kwargs) -> AsyncGenerator:
         params = kwargs.setdefault("params", dict())
-        endpoint = func(connection, *args)
+        endpoint = await func(connection, *args)
         async for item in list_paginator(connection, endpoint, params):
             yield item
+
+    return wrapper
+
+
+def post_item(func):
+    async def wrapper(connection: ConnectionManager, *args, **kwargs) -> Coroutine:
+        params = kwargs.setdefault("params", dict())
+        endpoint, body = await func(connection, *args)
+        return await connection.post(endpoint, body, params)
 
     return wrapper

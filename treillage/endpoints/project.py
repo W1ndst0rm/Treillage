@@ -1,7 +1,7 @@
-from typing import List
+from typing import List, Union
 from .. import ConnectionManager
-from ._decorators import get_item, get_item_list, requested_fields
-
+from ._decorators import get_item, get_item_list, requested_fields, post_item
+from ..classes import Project
 
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 #                              Projects
@@ -38,3 +38,14 @@ def get_project_vitals(
     requested_fields: List[str] = [""],
 ):
     return f"/core/projects/{project_id}/vitals"
+
+
+# POST Create Project
+@post_item
+def create_project(
+    connection: ConnectionManager,
+    project: Project,
+):
+
+    body = vars(project)
+    return f"/core/projects", body

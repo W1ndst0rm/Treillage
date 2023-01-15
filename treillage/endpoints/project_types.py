@@ -61,3 +61,10 @@ def get_project_type_phase_list(
     requested_fields: List[str] = [""],
 ):
     return f"core/projecttypes/{project_type_id}/phases"
+
+
+@get_item
+async def get_org_info(
+    connection: ConnectionManager,
+):
+    return "/core/users/me"
